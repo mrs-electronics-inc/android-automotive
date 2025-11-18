@@ -1,6 +1,6 @@
 # Update Demo App Dependencies
 
-The demo app uses a lot of outdated dependencies
+The demo app uses a lot of outdated dependencies. We should use the newest versions before diving in with anything.
 
 ## Task List
 

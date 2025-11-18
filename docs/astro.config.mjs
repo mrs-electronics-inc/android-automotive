@@ -8,7 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			plugins: [],
-			title: 'Android Automotive',
+			title: 'MRS Android Automotive',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/mrs-electronics-inc/android-automotive' },
 			],

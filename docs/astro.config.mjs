@@ -4,14 +4,13 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://replace-me.mrs-electronics.dev",
+	site: "https://android-automotive.mrs-electronics.dev",
 	integrations: [
 		starlight({
 			plugins: [],
-			title: 'Docs Template',
+			title: 'Android Automotive',
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/mrs-electronics-inc' },
-				{ icon: 'gitlab', label: 'GitLab', href: 'https://gitlab.com/mrs-electronics' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/mrs-electronics-inc/android-automotive' },
 			],
 			sidebar: [
 				{

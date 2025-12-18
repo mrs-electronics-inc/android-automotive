@@ -8,9 +8,38 @@ This document outlines the Specture System. As the Specture System is improved a
 
 Specs are design documents that describe planned changes to the system. They serve as a blueprint for implementation and a historical record of design decisions. They are continually improved during the design and implementation of a change, but left static after the change is complete.
 
+This system is inspired by [PEP](https://peps.python.org/) (Python Enhancement Proposal) and [BIP](https://github.com/bitcoin/bips) (Bitcoin Improvement Proposal), adapting their formal proposal processes for general software development.
+
 ## Spec File Structure
 
 Each spec file should be a markdown document with a numeric prefix in the `specs/` directory, for example `specs/000-mvp.md`.
+
+### Frontmatter
+
+Each spec should begin with YAML frontmatter containing metadata:
+
+```markdown
+---
+status: draft
+author: Your Name
+created: 2025-12-18
+---
+
+# Spec Title
+```
+
+**Status values:**
+
+- `draft` - Spec is in the process of being written and improved upon
+- `approved` - Spec has been approved and is awaiting implementation
+- `in-progress` - Implementation is underway
+- `completed` - All tasks have been completed
+- `rejected` - Spec was reviewed but rejected; include rejection reason in the description
+
+**Optional fields:**
+
+- `author` - Person who proposed or wrote the spec
+- `created` - Date the spec was created (YYYY-MM-DD format)
 
 ### Title
 
@@ -101,18 +130,30 @@ Use descriptive, kebab-case filenames with a numeric prefix:
 - **Link to discussions**: Reference PR/MR comments, issues, or other specs
 - **Focus on "why"**: The code shows "how", the spec should explain "why"
 
+## Approval
+
+A spec may remain in the draft status through several revisions.
+
+It is up to the project maintainers to determine when they are ready to merge a spec with the status set to `approved`. The requirements for what defines an approved spec will vary by project.
+
+## Rejection
+
+For most rejected specs, the project maintainers will not merge the spec. There's no reason to merge a proposal you don't intend to implement.
+
+However, some rejected specs may be useful to merge with the status set to `rejected`. These can act as a historical record of what was considered and rejected. The important thing in these cases is to clearly document **why** a proposal was rejected.
+
 ## Completion
 
-A spec is considered complete when all tasks in its task list are checked off. If there is still remaining work to be done for a change, be sure that the task list reflects this reality.
+Mark a spec's status as `completed` when all tasks in its task list are checked off. If there is still remaining work to be done for a change, be sure that the task list reflects this reality and keep the status as `in-progress`.
 
 ## Precedence System
 
-The requirements listed in one spec may become outdated with time. Once a spec is complete (as defined in the Completion section), it should be treated as a historical record and not retroactively updated. It is a bad idea to try to go back and update completed specs. Inevitably, something will be missed.
+The requirements listed in one spec may become outdated with time. Once a spec has status `completed`, it should be treated as a historical record and not retroactively updated. It is a bad idea to try to go back and update completed specs. This would be tedious and error-prone. Inevitably, something would be missed.
 
-The exception is to fix overlooked mistakes—typos, errors in documentation, or factual inaccuracies should be corrected.
+The exception is to fix overlooked mistakes-typos, errors in documentation, or factual inaccuracies should be corrected.
 
 Instead, we rely on a simple precedence system. The numeric prefix at the beginning of each spec defines its precedence. The higher the number is, the higher the precedence. If two specs contradict each other on any particular point, the higher numbered spec takes precedence.
 
 In general, the numbers should be incremented over time with each new spec added to the project.
 
-Some tricky situations might arise where it becomes necessary to number specs non-incrementally, especially when the team is working on drafting multiple specs at once. This is left to each project team to determine how to handle. Overall, no matter what scheme you determine for assigning numbers to each new spec, stick to the rule that higher number means higher precedence.
+Some tricky situations might arise where it becomes necessary to number specs non-incrementally, especially when a team is working on drafting multiple specs at once. A project's spec number assignment system should be optimized for the needs of that project. Overall, no matter what scheme you determine for assigning numbers to each new spec, stick to the rule that higher number means higher precedence.

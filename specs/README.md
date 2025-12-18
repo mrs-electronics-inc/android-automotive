@@ -28,29 +28,52 @@ Examples:
 
 Each spec file should be a Markdown document with a numeric prefix in the `specs/` directory, for example `specs/000-mvp.md`.
 
-### Frontmatter
-
-Each spec should begin with YAML frontmatter containing metadata:
+Example format:
 
 ```markdown
 ---
 status: draft
 author: Your Name
-created: 2025-12-18
+creation_date: 2025-12-18
 ---
 
-# Spec Title
+# Feature Name or Change Description
+
+Description as paragraphs and/or bullet list.
+
+## Task List
+
+### Foundation
+
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+### Core Implementation
+
+- [ ] Task 1
+- [ ] Task 2
+
+### Polish and Documentation
+
+- [ ] Task 1
+- [ ] Task 2
 ```
 
-**Status values:**
+### Frontmatter
 
-- `draft` - Spec is in the process of being written and improved upon
-- `approved` - Spec has been approved and is awaiting implementation
-- `in-progress` - Implementation is underway
-- `completed` - All tasks have been completed
-- `rejected` - Spec was reviewed but rejected
+Each spec should begin with YAML frontmatter containing metadata:
 
-**Optional fields:**
+#### Required Fields
+
+- `status`
+  - `draft` - Spec is in the process of being written and improved upon
+  - `approved` - Spec has been approved and is awaiting implementation
+  - `in-progress` - Implementation is underway
+  - `completed` - All tasks have been completed
+  - `rejected` - Spec was reviewed but rejected
+
+#### Optional Fields
 
 - `author` - Person(s) who proposed or wrote the spec
 - `creation_date` - Date the spec was created (YYYY-MM-DD format)
@@ -60,10 +83,6 @@ created: 2025-12-18
 ### Title
 
 The spec should start with a clear, descriptive H1 heading that summarizes what is being proposed.
-
-```markdown
-# Feature Name or Change Description
-```
 
 ### Description
 
@@ -90,28 +109,6 @@ The number of decisions mentioned will most likely be proportional to the size o
 
 A detailed breakdown of implementation tasks using markdown checklists. Split into logical sections if needed.
 
-**Format:**
-
-```markdown
-## Task List
-
-### Foundation
-
-- [ ] Task 1
-- [ ] Task 2
-- [ ] Task 3
-
-### Core Implementation
-
-- [ ] Task 1
-- [ ] Task 2
-
-### Polish and Documentation
-
-- [ ] Task 1
-- [ ] Task 2
-```
-
 #### Task List Best Practices
 
 - Make tasks specific and actionable
@@ -119,6 +116,7 @@ A detailed breakdown of implementation tasks using markdown checklists. Split in
 - Group related tasks into sections
 - Include testing, documentation, and deployment tasks where applicable
 - Keep individual tasks reasonably sized and self-contained
+- Avoid getting into nitty-gritty implementation details
 
 ## File Naming
 

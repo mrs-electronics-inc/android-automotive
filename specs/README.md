@@ -111,18 +111,6 @@ Use descriptive, kebab-case filenames with a numeric prefix:
 - `013-refactor-database-layer.md`
 - `314-redesign-api-endpoints.md`
 
-## Precedence System
-
-The requirements listed in one spec may become outdated with time. Once a spec has status `completed`, it should be treated as a historical record and not retroactively updated. It is a bad idea to try to go back and update completed specs. This would be tedious and error-prone. Inevitably, something would be missed.
-
-The exception is to fix overlooked mistakes-typos, errors in documentation, or factual inaccuracies should be corrected.
-
-Instead, we rely on a simple precedence system. The numeric prefix at the beginning of each spec defines its precedence. The higher the number is, the higher the precedence. If two specs contradict each other on any particular point, the higher numbered spec takes precedence.
-
-In general, the numbers should be incremented over time with each new spec added to the project.
-
-Some tricky situations might arise where it becomes necessary to number specs non-incrementally, especially when a team is working on drafting multiple specs at once. A project's spec number assignment system should be optimized for the needs of that project. Overall, no matter what scheme you determine for assigning numbers to each new spec, stick to the rule that higher number means higher precedence.
-
 ## Workflow
 
 ### Draft
@@ -161,10 +149,22 @@ It is up to the project maintainers to determine when they are ready to merge a 
 1. Mark the spec status as `completed` when all tasks in its task list are checked off
 2. If there is still remaining work to be done for a change, be sure that the task list reflects this reality and keep the status as `in-progress`
 3. Once a spec is marked as 'completed', it becomes a historical record and should not be retroactively updated
-4. Any new requirements become a higher-numbered spec
+4. Any new requirements become a higher-numbered spec (see [Precedence System](#precedence-system))
 
 ### Rejected
 
 For most rejected specs, the project maintainers will not merge the spec. There's no reason to merge a proposal you don't intend to implement.
 
 However, some rejected specs may be useful to merge with the status set to `rejected`. These can act as a historical record of what was considered and rejected. The important thing in these cases is to clearly document **why** a proposal was rejected.
+
+## Precedence System
+
+The requirements listed in one spec may become outdated with time. Once a spec has status `completed`, it should be treated as a historical record and not retroactively updated. It is a bad idea to try to go back and update completed specs. This would be tedious and error-prone. Inevitably, something would be missed.
+
+The exception is to fix overlooked mistakes-typos, errors in documentation, or factual inaccuracies should be corrected.
+
+Instead, we rely on a simple precedence system. The numeric prefix at the beginning of each spec defines its precedence. The higher the number is, the higher the precedence. If two specs contradict each other on any particular point, the higher numbered spec takes precedence.
+
+In general, the numbers should be incremented over time with each new spec added to the project.
+
+Some tricky situations might arise where it becomes necessary to number specs non-incrementally, especially when a team is working on drafting multiple specs at once. A project's spec number assignment system should be optimized for the needs of that project. Overall, no matter what scheme you determine for assigning numbers to each new spec, stick to the rule that higher number means higher precedence.

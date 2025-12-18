@@ -8,6 +8,12 @@ Specs are design documents that describe planned changes to the system. They ser
 
 This system is inspired by the [PEP](https://peps.python.org/) (Python Enhancement Proposal) and [BIP](https://github.com/bitcoin/bips) (Bitcoin Improvement Proposal) systems, adapting their formal proposal processes for general software development.
 
+## Specs vs. Issues vs. Epics
+
+**Specs are for planned changes**: new features, major refactors, redesigns, and tooling improvements. Use the issue tracker for bugs—cases where the software doesn't match what's described in the specs.
+
+In traditional project management, this scope would be split between epics (grouping work) and issues (individual tasks). Specture consolidates this: a spec includes the design rationale (why), the decisions (what and how), and the implementation task list all in one document. This keeps related information together and makes it easier for the reader to understand the full context. An individual spec can vary wildly in size, from as large as a traditional epic to as small as a tiny UI improvement.
+
 ## Spec File Structure
 
 Each spec file should be a markdown document with a numeric prefix in the `specs/` directory, for example `specs/000-mvp.md`.

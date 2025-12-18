@@ -8,11 +8,21 @@ Specs are design documents that describe planned changes to the system. They ser
 
 This system is inspired by the [PEP](https://peps.python.org/) (Python Enhancement Proposal) and [BIP](https://github.com/bitcoin/bips) (Bitcoin Improvement Proposal) systems, adapting their formal proposal processes for general software development.
 
-## Specs vs. Issues vs. Epics
+## Spec Scope
 
 **Specs are for planned changes**: new features, major refactors, redesigns, and tooling improvements. Use the issue tracker for bugs—cases where the software doesn't match what's described in the specs.
 
 In traditional project management, this scope would be split between epics (grouping work) and issues (individual tasks). Specture consolidates this: a spec includes the design rationale (why), the decisions (what and how), and the implementation task list all in one document. This keeps related information together and makes it easier for the reader to understand the full context. An individual spec can vary wildly in size, from as large as a traditional epic to as small as a tiny UI improvement.
+
+### When to split or combine specs
+
+A spec should be a coherent unit of work. Split specs when changes are independent—they can be implemented and deployed separately, have different design rationales, or solve different problems. Keep specs together when they share design decisions or task dependencies.
+
+Examples:
+
+- One spec: "Add authentication system" (related design choices, shared infrastructure)
+- Two specs: "Add authentication" and "Redesign dashboard UI" (independent changes)
+- One minimal spec: "Rename demo app consistently" (small but still a planned change)
 
 ## Spec File Structure
 

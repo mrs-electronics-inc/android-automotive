@@ -122,7 +122,7 @@ Use descriptive, kebab-case filenames with a numeric prefix:
 ### Draft
 
 1. Create a new spec file with frontmatter status set to `draft`
-2. Write the spec with all required sections (Title, Description, Design Decisions, Task List)
+2. Write the spec with required sections: Title, Description, and Task List. Include Design Decisions if there are meaningful choices to document
 3. Keep the spec updated as you refine the proposal
 4. Open pull/merge requests to share and refine the spec with the team
 5. The spec can be merged multiple times while still in draft status as it evolves
@@ -131,7 +131,6 @@ Use descriptive, kebab-case filenames with a numeric prefix:
 
 - **Be clear, not clever**: Write for future readers who may not have context
 - **Document alternatives**: Even rejected options are valuable to record
-- **Update as you go**: Specs should evolve during implementation
 - **Link to discussions**: Reference PR/MR comments, issues, or other specs
 - **Focus on "why"**: The code shows "how", the spec should explain "why"
 
@@ -154,7 +153,7 @@ It is up to the project maintainers to determine when they are ready to merge a 
 
 1. Mark the spec status as `completed` when all tasks in its task list are checked off
 2. If there is still remaining work to be done for a change, be sure that the task list reflects this reality and keep the status as `in-progress`
-3. Once a spec is marked as 'completed', it becomes a historical record and should not be retroactively updated
+3. Once a spec is marked as `completed`, it becomes a historical record and should not be retroactively updated
 4. Any new requirements become a higher-numbered spec (see [Precedence System](#precedence-system))
 
 ### Rejected
@@ -167,7 +166,7 @@ However, some rejected specs may be useful to merge with the status set to `reje
 
 The requirements listed in one spec may become outdated with time. Once a spec has status `completed`, it should be treated as a historical record and not retroactively updated. It is a bad idea to try to go back and update completed specs. This would be tedious and error-prone. Inevitably, something would be missed.
 
-The exception is to fix overlooked mistakes-typos, errors in documentation, or factual inaccuracies should be corrected.
+The exception is to fix overlooked mistakes—typos, errors in documentation, or factual inaccuracies should be corrected.
 
 Instead, we rely on a simple precedence system. The numeric prefix at the beginning of each spec defines its precedence. The higher the number is, the higher the precedence. If two specs contradict each other on any particular point, the higher numbered spec takes precedence.
 

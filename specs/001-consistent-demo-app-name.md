@@ -1,3 +1,8 @@
+---
+status: draft
+author: Addison Emig
+---
+
 # Consistent Demo App Name
 
 The demo app has a mixture of "Demo App" and "Display App". We should consistently use "Demo App".

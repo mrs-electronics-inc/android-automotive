@@ -28,7 +28,7 @@ Examples:
 
 Each spec file should be a Markdown document with a numeric prefix in the `specs/` directory, for example `specs/000-mvp.md`.
 
-Example format:
+**Example format:**
 
 ```markdown
 ---
@@ -37,9 +37,9 @@ author: Your Name
 creation_date: 2025-12-18
 ---
 
-# Feature Name or Change Description
+# Feature or Change Name
 
-Description as paragraphs and/or bullet list.
+Description as paragraphs and/or bulleted list.
 
 ## Task List
 

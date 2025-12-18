@@ -141,15 +141,15 @@ Use descriptive, kebab-case filenames with a numeric prefix:
 
 - **Be clear, not clever**: Write for future readers who may not have context
 - **Document alternatives**: Even rejected options are valuable to record
-- **Link to discussions**: Reference change request[^1] comments, issues, or other specs
+- **Link to discussions**: Reference pull request[^1] comments, issues, or other specs
 - **Focus on "why"**: The code shows "how", the spec should explain "why"
 
 ### Approved
 
 It is up to the project maintainers to determine when they are ready to merge a spec with the status set to `approved`. The requirements for what defines an approved spec will vary by project.
 
-1. Once the team agrees the spec is ready for implementation, update status to `approved` in a change request[^1]
-2. Merge the change request[^1] with the updated status
+1. Once the team agrees the spec is ready for implementation, update status to `approved` in a pull request
+2. Merge the pull request with the updated status
 3. Implementation can now begin
 
 ### In-Progress
@@ -182,4 +182,4 @@ In general, the numbers should be incremented over time with each new spec added
 
 Some tricky situations might arise where it becomes necessary to number specs non-incrementally, especially when a team is working on drafting multiple specs at once. A project's spec number assignment system should be optimized for the needs of that project. Overall, no matter what scheme you determine for assigning numbers to each new spec, stick to the rule that higher number means higher precedence.
 
-[^1]: The term "change request" is used as a platform-agnostic term. They are called "pull requests" on GitHub and "merge requests" on GitLab.
+[^1]: The usage of "pull request" in this document also applies to GitLab merge requests.

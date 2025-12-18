@@ -1,14 +1,12 @@
 # Spec Guidelines
 
-> This project uses the [Specture System](https://github.com/specture-system/specture)
-
-This document outlines the Specture System. As the Specture System is improved and updated, this file will also be updated.
+> This project uses the [Specture System](https://github.com/specture-system/specture), and this document outlines how it works. As the Specture System is improved and updated, this file will also be updated.
 
 ## Overview
 
 Specs are design documents that describe planned changes to the system. They serve as a blueprint for implementation and a historical record of design decisions. They are continually improved during the design and implementation of a change, but left static after the change is complete.
 
-This system is inspired by [PEP](https://peps.python.org/) (Python Enhancement Proposal) and [BIP](https://github.com/bitcoin/bips) (Bitcoin Improvement Proposal), adapting their formal proposal processes for general software development.
+This system is inspired by the [PEP](https://peps.python.org/) (Python Enhancement Proposal) and [BIP](https://github.com/bitcoin/bips) (Bitcoin Improvement Proposal) systems, adapting their formal proposal processes for general software development.
 
 ## Spec File Structure
 
@@ -34,7 +32,7 @@ created: 2025-12-18
 - `approved` - Spec has been approved and is awaiting implementation
 - `in-progress` - Implementation is underway
 - `completed` - All tasks have been completed
-- `rejected` - Spec was reviewed but rejected; include rejection reason in the description
+- `rejected` - Spec was reviewed but rejected
 
 **Optional fields:**
 
@@ -62,7 +60,7 @@ A few things to consider including:
 
 Feel free to use paragraph form or bulleted list form, whichever better matches the requirements of clearly describing the proposal.
 
-For large descriptions, please add subsection headers, for example: `## Ideas`, `## Goals`, `## Benefits`.
+For large descriptions, please add separate sections with their own headers, for example: `## Ideas`, `## Goals`, `## Benefits`.
 
 ### Design Decisions
 
@@ -79,24 +77,24 @@ A detailed breakdown of implementation tasks using markdown checklists. Split in
 ```markdown
 ## Task List
 
-### Phase 1: Foundation
+### Foundation
 
 - [ ] Task 1
 - [ ] Task 2
 - [ ] Task 3
 
-### Phase 2: Core Implementation
+### Core Implementation
 
 - [ ] Task 1
 - [ ] Task 2
 
-### Phase 3: Polish & Documentation
+### Polish & Documentation
 
 - [ ] Task 1
 - [ ] Task 2
 ```
 
-**Task List Best Practices:**
+#### Task List Best Practices
 
 - Make tasks specific and actionable
 - Order tasks logically (dependencies first)

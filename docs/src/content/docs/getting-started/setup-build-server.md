@@ -207,6 +207,12 @@ export MY_ANDROID="$(pwd)"
 
 This step will take a long time because it performs the initial source fetch and repository setup. Expect it to take at least an hour.
 
+After it completes, the Android source tree used for the build will be under:
+
+```text
+/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build
+```
+
 ## Build
 
 Start the build from `/srv/android-automotive`:
@@ -220,8 +226,8 @@ This recipe starts the build in the background. It does not require you to keep 
 
 The build workflow handles:
 
-- building the Docker image from the NXP source tree
-- starting a detached container with the shared source tree mounted at `/work/android_src`
+- building the Docker image from `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build`
+- starting a detached container with that `android_build` tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
 - running `./imx-make.sh -j3`
 

@@ -1,5 +1,6 @@
 workspace := "/srv/android-automotive"
 release := "imx-automotive-16.0.0_1.1.0"
+source_tree := workspace + "/" + release + "/android_build"
 images_dir := workspace + "/releases/" + release
 build_log := workspace + "/build.log"
 build_cid := workspace + "/build.cid"
@@ -17,7 +18,7 @@ extract-bsp archive=(release + ".tar.gz"):
 build: build-container build-images
 
 build-container:
-  cd {{workspace}}/{{release}}/device/nxp/common/dockerbuild && docker build --no-cache \
+  cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
     --build-arg userid=$(id -u) \
     --build-arg groupid=$(id -g) \
     --build-arg username=$(id -un) \
@@ -25,7 +26,7 @@ build-container:
 
 build-images:
   rm -f {{build_cid}} {{build_log}}
-  docker run -d --cidfile {{build_cid}} --privileged -v {{workspace}}/{{release}}:/work/android_src android-build /bin/bash -lc '\
+  docker run -d --cidfile {{build_cid}} --privileged -v {{source_tree}}:/work/android_src android-build /bin/bash -lc '\
     cd /work/android_src && \
     source build/envsetup.sh && \
     lunch mek_8q_car2-nxp_stable-userdebug && \

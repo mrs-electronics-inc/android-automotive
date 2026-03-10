@@ -84,11 +84,28 @@ Add any future build-server users to the `android-build` group as well so they c
 
 This directory will hold downloaded release archives, the extracted source tree, and generated build artifacts.
 
+## Verify workspace access
+
+After running `sudo usermod -aG android-build "$USER"`, start a fresh shell in the new group before continuing. The simplest option is:
+
+```bash
+newgrp android-build
+```
+
+Before moving on, verify that this shell can write to the shared workspace:
+
+```bash
+touch /srv/android-automotive/test.txt
+rm /srv/android-automotive/test.txt
+```
+
+If `touch` fails, run `newgrp android-build` again and repeat the check before running any `just` recipes inside `/srv/android-automotive`.
+
 ## Copy the build server `justfile`
 
 This repo includes a dedicated build-server `justfile` [here](/build-server/justfile).
 
-From the repo root on your laptop, copy that file onto the build server with:
+Run this recipe from the repo root on your laptop to copy that file onto the build server:
 
 ```bash
 just push-build-server-file user@host docs/public/build-server/justfile
@@ -105,13 +122,12 @@ just
 
 This will list the available build server recipes.
 
-## Prepare the shared build workflow
+## Install `repo`
 
-From `/srv/android-automotive`, run the one-time setup recipes:
+From `/srv/android-automotive`, run the remaining one-time setup recipe:
 
 ```bash
 cd /srv/android-automotive
-just init-workspace
 just install-repo
 ```
 
@@ -133,7 +149,9 @@ NXP requires login and export-control checks before the source package download 
 Do not mix source bundles and build artifacts from different NXP releases. Pick one release and keep the naming consistent in the workspace, published artifacts, and any notes shared with the team.
 :::
 
-Use the same recipe to copy the source bundle onto the build server:
+## Extract the source bundle
+
+Run this recipe from the repo root on your laptop to copy the source bundle onto the build server:
 
 ```bash
 just push-build-server-file user@host /path/to/imx-automotive-16.0.0_1.1.0.tar.gz
@@ -147,12 +165,16 @@ After copying the source bundle to the build server, your workspace should look 
 └── imx-automotive-16.0.0_1.1.0.tar.gz
 ```
 
-Then extract it:
+Then extract it on the build server:
 
 ```bash
 cd /srv/android-automotive
 just extract-bsp
 ```
+
+:::caution
+If `just extract-bsp` fails with `Permission denied`, your current shell still does not have write access to `/srv/android-automotive`. Go back to [Verify workspace access](#verify-workspace-access), start a fresh shell in `android-build`, and verify that `touch /srv/android-automotive/test.txt` works before trying again.
+:::
 
 After extraction, you should have a source tree at:
 
@@ -160,15 +182,22 @@ After extraction, you should have a source tree at:
 /srv/android-automotive/imx-automotive-16.0.0_1.1.0
 ```
 
-Before moving on, verify:
+Verify the extracted source directory:
 
-- the tarball filename matches the release you intend to build
-- the extracted directory name matches that same release
-- the bundle was copied into `/srv/android-automotive`, not a per-user directory
+```bash
+ls -lah /srv/android-automotive/imx-automotive-16.0.0_1.1.0
+```
 
 ## Initialize the Android source tree
 
-After extracting the NXP bundle, source the setup script included in the release:
+Configure Git identity for the build user:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
+
+Then source the setup script included in the release:
 
 ```bash
 cd /srv/android-automotive/imx-automotive-16.0.0_1.1.0
@@ -176,33 +205,53 @@ source ./imx_android_setup.sh
 export MY_ANDROID="$(pwd)"
 ```
 
+This step will take a long time because it performs the initial source fetch and repository setup. Expect it to take longer than half an hour.
+
 ## Build
 
-Run the shared build recipe from `/srv/android-automotive`:
+Start the build from `/srv/android-automotive`:
 
 ```bash
 cd /srv/android-automotive
 just build
 ```
 
-That recipe handles:
+This recipe starts the build in the background. It does not require you to keep the SSH session open while the build runs.
+
+The build workflow handles:
 
 - building the Docker image from the NXP source tree
-- starting the container with the shared source tree mounted at `/work/android_src`
+- starting a detached container with the shared source tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
 - running `./imx-make.sh -j3`
+
+To check whether the detached container is still running:
+
+```bash
+cd /srv/android-automotive
+just build-status
+```
+
+To inspect the latest build output:
+
+```bash
+cd /srv/android-automotive
+just build-logs
+```
 
 When the build completes, the output images should be under:
 
 ```bash
-ls -al "${MY_ANDROID}/out/target/product/mek_8q"
+ls -lah "${MY_ANDROID}/out/target/product/mek_8q"
 ```
 
 ## Publish build outputs
 
 Publishing build outputs should mean creating a stable release directory on the build server that the laptop can pull from later.
 
-For the current shared `justfile`, the publish target is: `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
+For the current shared `justfile`, the publish target is:
+
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
 Run:
 
@@ -221,7 +270,7 @@ That should produce a directory shaped roughly like this:
 
 The `mek_8q/` directory is copied from:
 
-- `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
+`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
 
 At minimum, the published release directory should contain:
 
@@ -233,12 +282,12 @@ Verify the published release directory with:
 
 ```bash
 cd /srv/android-automotive
-just verify-publish
+just verify-artifacts
 ```
 
 The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
 
-- `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
+`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
 
 That separation matters because it gives you:
 
@@ -246,7 +295,7 @@ That separation matters because it gives you:
 - a directory name tied to a specific NXP release
 - fewer mistakes when multiple builds or rebuilds exist on the server
 
-From the repo root on your laptop, you can pull the published release directory into local `/tmp` with:
+Run this recipe from the repo root on your laptop to pull the published release directory into local `/tmp`:
 
 ```bash
 just pull-build-artifacts user@host
@@ -254,11 +303,11 @@ just pull-build-artifacts user@host
 
 That copies:
 
-- `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
 to:
 
-- `/tmp/imx-automotive-16.0.0_1.1.0`
+`/tmp/imx-automotive-16.0.0_1.1.0`
 
 ## Common failure points
 

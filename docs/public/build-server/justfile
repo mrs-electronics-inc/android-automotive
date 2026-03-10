@@ -1,22 +1,11 @@
 workspace := "/srv/android-automotive"
 release := "imx-automotive-16.0.0_1.1.0"
 images_dir := workspace + "/releases/" + release
+build_log := workspace + "/build.log"
+build_cid := workspace + "/build.cid"
 
 default:
   @just --list
-
-build: build-container build-images
-
-publish: publish-artifacts
-
-verify-publish:
-  ls -al {{images_dir}}
-  ls -al {{images_dir}}/mek_8q
-
-init-workspace:
-  sudo mkdir -p {{workspace}}
-  sudo chgrp -R android-build {{workspace}}
-  sudo chmod -R 2775 {{workspace}}
 
 install-repo:
   sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
@@ -24,6 +13,8 @@ install-repo:
 
 extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
+
+build: build-container build-images
 
 build-container:
   cd {{workspace}}/{{release}}/device/nxp/common/dockerbuild && docker build --no-cache \
@@ -33,13 +24,27 @@ build-container:
     -t android-build .
 
 build-images:
-  docker run --privileged -it -v {{workspace}}/{{release}}:/work/android_src android-build /bin/bash -lc '\
+  rm -f {{build_cid}} {{build_log}}
+  docker run -d --cidfile {{build_cid}} --privileged -v {{workspace}}/{{release}}:/work/android_src android-build /bin/bash -lc '\
     cd /work/android_src && \
     source build/envsetup.sh && \
     lunch mek_8q_car2-nxp_stable-userdebug && \
-    ./imx-make.sh -j3 2>&1 | tee build-log.txt'
+    ./imx-make.sh -j3 2>&1 | tee build-log.txt' > {{build_log}}
+  cat {{build_cid}}
+
+build-status:
+  docker ps -a --filter "id=$(cat {{build_cid}} 2>/dev/null)" || true
+
+build-logs:
+  tail -n 200 {{build_log}}
+
+publish: publish-artifacts
 
 publish-artifacts:
   mkdir -p {{images_dir}}
   cp -r {{workspace}}/{{release}}/out/target/product/mek_8q {{images_dir}}/
   cp {{workspace}}/{{release}}/build-log.txt {{images_dir}}/ 2>/dev/null || true
+
+verify-artifacts:
+  ls -al {{images_dir}}
+  ls -al {{images_dir}}/mek_8q

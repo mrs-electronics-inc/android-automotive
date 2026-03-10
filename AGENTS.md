@@ -5,3 +5,17 @@ See the [contributing guidelines](./CONTRIBUTING.md) for basic developer informa
 ## Specture System
 
 This project uses the [Specture System](https://github.com/specture-system/specture) for managing specs. See the `.agents/skills/specture/` skill for the full workflow, or run `specture help` for CLI usage.
+
+## Guidelines
+
+### Always Do (no asking)
+
+- Use conventional commit format
+
+### Ask First (pause for approval)
+
+- Push to remote
+
+### Never Do (hard stop)
+
+- Ammend commits

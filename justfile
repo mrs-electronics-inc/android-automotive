@@ -1,18 +1,26 @@
 default:
-  @just --list
-
-setup-build-server-justfile target:
-  scp docs/public/build-server/justfile {{target}}:/srv/android-automotive/justfile
-
-pull-build-artifacts target:
-  rm -rf /tmp/imx-automotive-16.0.0_1.1.0
-  scp -r {{target}}:/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0 /tmp/
+    @just --list
 
 deps:
-  cd docs && npm install
+    cd docs && npm install
 
 setup: deps
-  pre-commit install
+    pre-commit install
 
 run-docs:
-  cd docs && npm run dev -- --host 127.0.0.1
+    cd docs && npm run dev -- --host 127.0.0.1
+
+###################################################
+## Recipes for interacting with the build server ##
+## Keep in-sync with docs/public/justfile        ##
+###################################################
+
+workspace := "/srv/android-automotive"
+release := "imx-automotive-16.0.0_1.1.0"
+images_dir := workspace + "/releases/" + release
+
+push-build-server-file target file:
+    rsync -avz {{ file }} {{ target }}:{{ workspace }}/
+
+pull-build-artifacts target:
+    rsync -avz {{ target }}:{{ images_dir }}/ /tmp/{{ release }}/

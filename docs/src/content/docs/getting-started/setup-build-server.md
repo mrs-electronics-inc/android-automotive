@@ -86,10 +86,10 @@ This repo includes a dedicated build-server `justfile` [here](/build-server/just
 From the repo root on your laptop, copy that file onto the build server with:
 
 ```bash
-just setup-build-server-justfile user@host
+just push-build-server-file user@host docs/public/build-server/justfile
 ```
 
-That recipe copies the file to `/srv/android-automotive/justfile`.
+That recipe copies the given file into `/srv/android-automotive/` on the build server.
 
 The intended usage on the build server is:
 
@@ -116,7 +116,7 @@ Download the Android Automotive release package from the [NXP Android Automotive
 
 Then click the **Downloads** button.
 
-The first entry should be `16.0.0_1.1.0_ANDROID_Automotive_SOURCE`, click the `Download` button and follow the short form until you have downloaded the ~350 MB `.tar.gz` file.
+Find `16.0.0_1.1.0_ANDROID_Automotive_SOURCE`, click the `Download` button, and follow the short form until you have downloaded the `.tar.gz` file.
 
 You can also download the matching `Documentation` package and any release notes you want to keep with the build, but the source package above is the key artifact for the build server workflow.
 
@@ -125,10 +125,14 @@ NXP requires login and export-control checks before the source package download 
 :::
 
 :::caution
-Do not mix source bundles, manifests, and prebuilt images from different NXP releases. Pick one release and keep the naming consistent in the workspace, published artifacts, and any notes shared with the team.
+Do not mix source bundles and build artifacts from different NXP releases. Pick one release and keep the naming consistent in the workspace, published artifacts, and any notes shared with the team.
 :::
 
-TODO add a just recipe for copying the source to the build server
+Use the same recipe to copy the source bundle onto the build server:
+
+```bash
+just push-build-server-file user@host /path/to/imx-automotive-16.0.0_1.1.0.tar.gz
+```
 
 After copying the source bundle to the build server, your workspace should look like this:
 
@@ -151,15 +155,6 @@ After extraction, you should have a source tree at:
 /srv/android-automotive/imx-automotive-16.0.0_1.1.0
 ```
 
-If you are also storing the optional prebuilt image package on the server, keep it alongside the source bundle rather than unpacking it into a user home directory. For example:
-
-```text
-/srv/android-automotive/
-├── justfile
-├── imx-automotive-16.0.0_1.1.0.tar.gz
-└── automotive-16.0.0_1.1.0_image_8qmek_car2.tar.gz
-```
-
 Before moving on, verify:
 
 - the tarball filename matches the release you intend to build
@@ -176,18 +171,7 @@ source ./imx_android_setup.sh
 export MY_ANDROID="$(pwd)"
 ```
 
-If you need to initialize manually, use the manifest that matches your NXP release:
-
-```bash
-repo init -u https://github.com/nxp-imx/imx-manifest \
-  -b imx-android-16 \
-  -m rel_automotive-16.0.0_1.1.0.xml
-repo sync -c -j8
-```
-
-`repo sync` will take a while and requires a stable network connection and significant disk space.
-
-## Build with the shared `justfile`
+## Build
 
 Run the shared build recipe from `/srv/android-automotive`:
 
@@ -213,9 +197,7 @@ ls -al "${MY_ANDROID}/out/target/product/mek_8q"
 
 Publishing build outputs should mean creating a stable release directory on the build server that the laptop can pull from later.
 
-For the current shared `justfile`, the publish target is:
-
-- `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
+For the current shared `justfile`, the publish target is: `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
 Run:
 
@@ -242,11 +224,11 @@ At minimum, the published release directory should contain:
 - the full `mek_8q` output directory from the build
 - the build log
 
-Before handing the release off to the laptop workflow, verify the published directory exists:
+Verify the published release directory with:
 
 ```bash
-ls -al /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0
-ls -al /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q
+cd /srv/android-automotive
+just verify-publish
 ```
 
 The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
@@ -272,22 +254,6 @@ That copies:
 to:
 
 - `/tmp/imx-automotive-16.0.0_1.1.0`
-
-## Optional: verify image contents before handoff
-
-Before handing artifacts to the laptop workflow, confirm the expected files exist:
-
-```bash
-ls -al "${MY_ANDROID}/out/target/product/mek_8q"
-```
-
-If you also keep NXP prebuilt image packages on the build server for reference, store them in the shared workspace too:
-
-```bash
-cd /srv/android-automotive
-tar -xzvf automotive-16.0.0_1.1.0_image_8qmek_car2.tar.gz
-cd automotive-16.0.0_1.1.0_image_8qmek_car2
-```
 
 ## Common failure points
 

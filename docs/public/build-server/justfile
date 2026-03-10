@@ -9,6 +9,10 @@ build: build-container build-images
 
 publish: publish-artifacts
 
+verify-publish:
+  ls -al {{images_dir}}
+  ls -al {{images_dir}}/mek_8q
+
 init-workspace:
   sudo mkdir -p {{workspace}}
   sudo chgrp -R android-build {{workspace}}

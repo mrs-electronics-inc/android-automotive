@@ -26,7 +26,7 @@ build-container:
 
 build-images:
   rm -f {{build_cid}} {{build_log}}
-  docker run -d --cidfile {{build_cid}} --privileged -v {{source_tree}}:/work/android_src android-build /bin/bash -lc '\
+  docker run -d --cidfile {{build_cid}} --entrypoint /bin/bash --privileged -v {{source_tree}}:/work/android_src android-build -lc '\
     cd /work/android_src && \
     source build/envsetup.sh && \
     lunch mek_8q_car2-nxp_stable-userdebug && \
@@ -37,7 +37,7 @@ build-status:
   docker ps -a --filter "id=$(cat {{build_cid}} 2>/dev/null)" || true
 
 build-logs:
-  tail -n 200 {{build_log}}
+  docker logs $(cat {{build_cid}})
 
 publish: publish-artifacts
 

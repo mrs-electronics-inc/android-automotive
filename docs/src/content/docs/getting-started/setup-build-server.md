@@ -112,50 +112,43 @@ just install-repo
 
 ## Download the NXP release bundle
 
-Download the Android Automotive release package for your target version from NXP.
+Download the Android Automotive release package from the [NXP Android Automotive software page](https://www.nxp.com/design/design-center/software/embedded-software/i-mx-software/android-automotive-os-for-i-mx-applications-processors:ANDROID-AUTO)
 
-For the build server, start by deciding the exact NXP release you are standardizing on.
+Then click the **Downloads** button.
 
-For example, this guide assumes:
+The first entry should be `16.0.0_1.1.0_ANDROID_Automotive_SOURCE`, click the `Download` button and follow the short form until you have downloaded the ~350 MB `.tar.gz` file.
 
-- `imx-automotive-15.0.0_2.1.0`
+You can also download the matching `Documentation` package and any release notes you want to keep with the build, but the source package above is the key artifact for the build server workflow.
 
+:::caution
+NXP requires login and export-control checks before the source package download is available. You can't download from the build server.
+:::
+
+:::caution
 Do not mix source bundles, manifests, and prebuilt images from different NXP releases. Pick one release and keep the naming consistent in the workspace, published artifacts, and any notes shared with the team.
+:::
 
-At minimum, you will typically need:
+TODO add a just recipe for copying the source to the build server
 
-- The main source bundle, such as `imx-automotive-15.0.0_2.1.0.tar.gz`
-- The matching prebuilt image package if you want a fast flash-and-verify path
-
-The source bundle is the required artifact for the build server. The prebuilt image package is optional and mainly useful for quick comparison or for proving out a board independently of a full source build.
-
-The simplest workflow is:
-
-1. Download the release artifacts from the NXP portal onto your laptop or another trusted machine.
-2. Copy the source bundle onto the build server.
-3. Store it directly in `/srv/android-automotive`.
-4. Run the shared extraction recipe from there.
-
-After copying the source bundle to the build server, your workspace should look roughly like this:
+After copying the source bundle to the build server, your workspace should look like this:
 
 ```text
 /srv/android-automotive/
 ├── justfile
-└── imx-automotive-15.0.0_2.1.0.tar.gz
+└── imx-automotive-16.0.0_1.1.0.tar.gz
 ```
 
 Then extract it:
 
 ```bash
 cd /srv/android-automotive
-cp /path/to/imx-automotive-15.0.0_2.1.0.tar.gz .
 just extract-bsp
 ```
 
 After extraction, you should have a source tree at:
 
 ```text
-/srv/android-automotive/imx-automotive-15.0.0_2.1.0
+/srv/android-automotive/imx-automotive-16.0.0_1.1.0
 ```
 
 If you are also storing the optional prebuilt image package on the server, keep it alongside the source bundle rather than unpacking it into a user home directory. For example:
@@ -163,8 +156,8 @@ If you are also storing the optional prebuilt image package on the server, keep 
 ```text
 /srv/android-automotive/
 ├── justfile
-├── imx-automotive-15.0.0_2.1.0.tar.gz
-└── automotive-15.0.0_2.1.0_image_8qmek_car2.tar.gz
+├── imx-automotive-16.0.0_1.1.0.tar.gz
+└── automotive-16.0.0_1.1.0_image_8qmek_car2.tar.gz
 ```
 
 Before moving on, verify:
@@ -178,7 +171,7 @@ Before moving on, verify:
 After extracting the NXP bundle, source the setup script included in the release:
 
 ```bash
-cd /srv/android-automotive/imx-automotive-15.0.0_2.1.0
+cd /srv/android-automotive/imx-automotive-16.0.0_1.1.0
 source ./imx_android_setup.sh
 export MY_ANDROID="$(pwd)"
 ```
@@ -187,8 +180,8 @@ If you need to initialize manually, use the manifest that matches your NXP relea
 
 ```bash
 repo init -u https://github.com/nxp-imx/imx-manifest \
-  -b imx-android-15 \
-  -m rel_automotive-15.0.0_2.1.0.xml
+  -b imx-android-16 \
+  -m rel_automotive-16.0.0_1.1.0.xml
 repo sync -c -j8
 ```
 
@@ -222,7 +215,7 @@ Publishing build outputs should mean creating a stable release directory on the 
 
 For the current shared `justfile`, the publish target is:
 
-- `/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0`
+- `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
 Run:
 
@@ -234,14 +227,14 @@ just publish
 That should produce a directory shaped roughly like this:
 
 ```text
-/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0/
+/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/
 ├── build-log.txt
 └── mek_8q/
 ```
 
 The `mek_8q/` directory is copied from:
 
-- `/srv/android-automotive/imx-automotive-15.0.0_2.1.0/out/target/product/mek_8q`
+- `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
 
 At minimum, the published release directory should contain:
 
@@ -252,13 +245,13 @@ At minimum, the published release directory should contain:
 Before handing the release off to the laptop workflow, verify the published directory exists:
 
 ```bash
-ls -al /srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0
-ls -al /srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0/mek_8q
+ls -al /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0
+ls -al /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q
 ```
 
 The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
 
-- `/srv/android-automotive/imx-automotive-15.0.0_2.1.0/out/target/product/mek_8q`
+- `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
 
 That separation matters because it gives you:
 
@@ -274,11 +267,11 @@ just pull-build-artifacts user@host
 
 That copies:
 
-- `/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0`
+- `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
 to:
 
-- `/tmp/imx-automotive-15.0.0_2.1.0`
+- `/tmp/imx-automotive-16.0.0_1.1.0`
 
 ## Optional: verify image contents before handoff
 
@@ -292,8 +285,8 @@ If you also keep NXP prebuilt image packages on the build server for reference, 
 
 ```bash
 cd /srv/android-automotive
-tar -xzvf automotive-15.0.0_2.1.0_image_8qmek_car2.tar.gz
-cd automotive-15.0.0_2.1.0_image_8qmek_car2
+tar -xzvf automotive-16.0.0_1.1.0_image_8qmek_car2.tar.gz
+cd automotive-16.0.0_1.1.0_image_8qmek_car2
 ```
 
 ## Common failure points

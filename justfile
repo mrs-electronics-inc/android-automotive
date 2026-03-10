@@ -5,8 +5,8 @@ setup-build-server-justfile target:
   scp docs/public/build-server/justfile {{target}}:/srv/android-automotive/justfile
 
 pull-build-artifacts target:
-  rm -rf /tmp/imx-automotive-15.0.0_2.1.0
-  scp -r {{target}}:/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0 /tmp/
+  rm -rf /tmp/imx-automotive-16.0.0_1.1.0
+  scp -r {{target}}:/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0 /tmp/
 
 deps:
   cd docs && npm install

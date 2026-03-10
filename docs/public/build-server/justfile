@@ -1,5 +1,5 @@
 workspace := "/srv/android-automotive"
-release := "imx-automotive-15.0.0_2.1.0"
+release := "imx-automotive-16.0.0_1.1.0"
 images_dir := workspace + "/releases/" + release
 
 default:

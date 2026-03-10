@@ -3,7 +3,7 @@ release := "imx-automotive-16.0.0_1.1.0"
 source_tree := workspace + "/" + release + "/android_build"
 images_dir := workspace + "/releases/" + release
 build_log := workspace + "/build.log"
-build_cid := workspace + "/build.cid"
+build_container := "android-automotive-build"
 
 default:
   @just --list
@@ -25,19 +25,19 @@ build-container:
     -t android-build .
 
 build-images:
-  rm -f {{build_cid}} {{build_log}}
-  docker run -d --cidfile {{build_cid}} --entrypoint /bin/bash --privileged -v {{source_tree}}:/work/android_src android-build -lc '\
+  rm -f {{build_log}}
+  docker rm -f {{build_container}} 2>/dev/null || true
+  docker run -d --name {{build_container}} --entrypoint /bin/bash --privileged -v {{source_tree}}:/work/android_src android-build -lc '\
     cd /work/android_src && \
     source build/envsetup.sh && \
     lunch mek_8q_car2-nxp_stable-userdebug && \
     ./imx-make.sh -j3 2>&1 | tee build-log.txt' > {{build_log}}
-  cat {{build_cid}}
 
 build-status:
-  docker ps -a --filter "id=$(cat {{build_cid}} 2>/dev/null)" || true
+  docker ps -a --filter "name={{build_container}}" || true
 
 build-logs:
-  docker logs $(cat {{build_cid}})
+  docker logs {{build_container}}
 
 publish: publish-artifacts
 

@@ -29,16 +29,15 @@ This guide focuses on the build-server side:
 4. Sync and build the source tree.
 5. Store the resulting artifacts in a predictable shared location.
 
-## Recommended host machine
+## Host requirements
 
-Use a dedicated Linux build machine with:
+This workflow assumes a dedicated build server with:
 
 - Ubuntu 24.04
-- At least 32 GB RAM
-- At least 450 GB free disk space
-- Docker available if you plan to use NXP's containerized build flow
-
-If your machine is smaller than this, builds may still work, but they will be slower and more fragile.
+- 4 CPU cores
+- 32 GB RAM
+- 450 GB of free disk space before the source bundle is extracted
+- Docker installed and usable by the build users
 
 ## What you need before you start
 
@@ -71,10 +70,6 @@ newgrp docker
 
 ## Create a shared workspace
 
-Choose a location with plenty of free disk space that is not tied to one user's home directory.
-
-For example:
-
 ```bash
 sudo mkdir -p /srv/android-automotive
 sudo chgrp -R android-build /srv/android-automotive
@@ -82,13 +77,7 @@ sudo chmod -R 2775 /srv/android-automotive
 cd /srv/android-automotive
 ```
 
-The exact group name is up to your environment, but the goal is the same:
-
-- multiple maintainers can access the workspace
-- the source tree survives user churn
-- artifacts land in a predictable place
-
-This directory should hold downloaded release archives, the extracted source tree, and generated build artifacts.
+This directory will hold downloaded release archives, the extracted source tree, and generated build artifacts.
 
 ## Copy the build server `justfile`
 
@@ -100,9 +89,7 @@ From the repo root on your laptop, copy that file onto the build server with:
 just setup-build-server-justfile user@host
 ```
 
-That recipe copies the file to:
-
-- `/srv/android-automotive/justfile`
+That recipe copies the file to `/srv/android-automotive/justfile`.
 
 The intended usage on the build server is:
 
@@ -110,6 +97,8 @@ The intended usage on the build server is:
 cd /srv/android-automotive
 just
 ```
+
+This will list the available build server recipes.
 
 ## Prepare the shared build workflow
 

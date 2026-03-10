@@ -5,25 +5,38 @@ sidebar:
 description: Prepare a Linux build machine for Android Automotive work with the NXP i.MX 8QuadMax MEK.
 ---
 
-This guide gets a Linux machine ready to build and flash Android Automotive for the NXP i.MX 8QuadMax MEK.
+This guide gets a shared Linux machine ready to build Android Automotive images for the NXP i.MX 8QuadMax MEK.
 
-It focuses on the first successful bring-up:
+This machine is treated as a build server, not the day-to-day development workstation.
+
+Use the build server to:
+
+1. Store the large NXP source tree and release bundles.
+2. Build Android images and related artifacts.
+3. Publish those artifacts somewhere the team can retrieve them.
+
+Use your laptop to:
+
+1. Flash hardware with `adb`, `fastboot`, or `uuu` as needed.
+2. Deploy app changes.
+3. Capture logs and debug the target device.
+
+This guide focuses on the build-server side:
 
 1. Prepare the host machine.
-2. Download the NXP release package.
-3. Sync and build the source tree.
-4. Flash the board.
-5. Confirm the system boots and responds over ADB.
+2. Copy the shared `justfile` onto the server.
+3. Download the NXP release package.
+4. Sync and build the source tree.
+5. Store the resulting artifacts in a predictable shared location.
 
 ## Recommended host machine
 
 Use a dedicated Linux build machine with:
 
-- Ubuntu 24.04 or another Linux environment you can keep stable
+- Ubuntu 24.04
 - At least 32 GB RAM
 - At least 450 GB free disk space
 - Docker available if you plan to use NXP's containerized build flow
-- A reliable USB connection for flashing and serial access
 
 If your machine is smaller than this, builds may still work, but they will be slower and more fragile.
 
@@ -32,14 +45,12 @@ If your machine is smaller than this, builds may still work, but they will be sl
 Make sure you have access to:
 
 - The NXP Android Automotive BSP for your target release
-- The NXP i.MX 8QuadMax MEK board
-- A USB-C cable for device flashing
-- A USB-to-UART adapter for serial logs
 - Credentials or portal access required to download NXP release artifacts
+- A shared location or convention for publishing completed build outputs
 
 ## Install host tools
 
-Install the tools required for source sync, flashing, debugging, and containerized builds:
+Install the tools required to run the shared build workflow:
 
 ```bash
 sudo apt update
@@ -47,11 +58,8 @@ sudo apt install -y \
   git \
   curl \
   unzip \
-  usbutils \
-  adb \
-  fastboot \
-  minicom \
-  docker.io
+  docker.io \
+  just
 ```
 
 Add your user to the Docker group if needed:
@@ -61,52 +69,127 @@ sudo usermod -aG docker "$USER"
 newgrp docker
 ```
 
-## Create a workspace
+## Create a shared workspace
 
-Choose a location with plenty of free disk space:
+Choose a location with plenty of free disk space that is not tied to one user's home directory.
+
+For example:
 
 ```bash
-mkdir -p ~/android-automotive
-cd ~/android-automotive
+sudo mkdir -p /srv/android-automotive
+sudo chgrp -R android-build /srv/android-automotive
+sudo chmod -R 2775 /srv/android-automotive
+cd /srv/android-automotive
 ```
 
-This directory will hold downloaded release archives, the extracted source tree, and generated build artifacts.
+The exact group name is up to your environment, but the goal is the same:
+
+- multiple maintainers can access the workspace
+- the source tree survives user churn
+- artifacts land in a predictable place
+
+This directory should hold downloaded release archives, the extracted source tree, and generated build artifacts.
+
+## Copy the build server `justfile`
+
+This repo includes a dedicated build-server `justfile` [here](/build-server/justfile).
+
+From the repo root on your laptop, copy that file onto the build server with:
+
+```bash
+just setup-build-server-justfile user@host
+```
+
+That recipe copies the file to:
+
+- `/srv/android-automotive/justfile`
+
+The intended usage on the build server is:
+
+```bash
+cd /srv/android-automotive
+just
+```
+
+## Prepare the shared build workflow
+
+From `/srv/android-automotive`, run the one-time setup recipes:
+
+```bash
+cd /srv/android-automotive
+just init-workspace
+just install-repo
+```
 
 ## Download the NXP release bundle
 
 Download the Android Automotive release package for your target version from NXP.
 
-At minimum you will typically need:
+For the build server, start by deciding the exact NXP release you are standardizing on.
+
+For example, this guide assumes:
+
+- `imx-automotive-15.0.0_2.1.0`
+
+Do not mix source bundles, manifests, and prebuilt images from different NXP releases. Pick one release and keep the naming consistent in the workspace, published artifacts, and any notes shared with the team.
+
+At minimum, you will typically need:
 
 - The main source bundle, such as `imx-automotive-15.0.0_2.1.0.tar.gz`
 - The matching prebuilt image package if you want a fast flash-and-verify path
 
-Place the downloaded files in your workspace and extract the source bundle:
+The source bundle is the required artifact for the build server. The prebuilt image package is optional and mainly useful for quick comparison or for proving out a board independently of a full source build.
 
-```bash
-cd ~/android-automotive
-tar -xzvf imx-automotive-15.0.0_2.1.0.tar.gz
+The simplest workflow is:
+
+1. Download the release artifacts from the NXP portal onto your laptop or another trusted machine.
+2. Copy the source bundle onto the build server.
+3. Store it directly in `/srv/android-automotive`.
+4. Run the shared extraction recipe from there.
+
+After copying the source bundle to the build server, your workspace should look roughly like this:
+
+```text
+/srv/android-automotive/
+├── justfile
+└── imx-automotive-15.0.0_2.1.0.tar.gz
 ```
 
-## Install the `repo` tool
-
-Android source checkouts rely on Google's `repo` helper:
+Then extract it:
 
 ```bash
-mkdir -p ~/bin
-curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-chmod +x ~/bin/repo
-export PATH="$HOME/bin:$PATH"
+cd /srv/android-automotive
+cp /path/to/imx-automotive-15.0.0_2.1.0.tar.gz .
+just extract-bsp
 ```
 
-To keep this available in future shells, add `export PATH="$HOME/bin:$PATH"` to your shell profile.
+After extraction, you should have a source tree at:
+
+```text
+/srv/android-automotive/imx-automotive-15.0.0_2.1.0
+```
+
+If you are also storing the optional prebuilt image package on the server, keep it alongside the source bundle rather than unpacking it into a user home directory. For example:
+
+```text
+/srv/android-automotive/
+├── justfile
+├── imx-automotive-15.0.0_2.1.0.tar.gz
+└── automotive-15.0.0_2.1.0_image_8qmek_car2.tar.gz
+```
+
+Before moving on, verify:
+
+- the tarball filename matches the release you intend to build
+- the extracted directory name matches that same release
+- the bundle was copied into `/srv/android-automotive`, not a per-user directory
 
 ## Initialize the Android source tree
 
 After extracting the NXP bundle, source the setup script included in the release:
 
 ```bash
-cd ~/android-automotive/imx-automotive-15.0.0_2.1.0
+cd /srv/android-automotive/imx-automotive-15.0.0_2.1.0
 source ./imx_android_setup.sh
 export MY_ANDROID="$(pwd)"
 ```
@@ -122,35 +205,21 @@ repo sync -c -j8
 
 `repo sync` will take a while and requires a stable network connection and significant disk space.
 
-## Build with Docker
+## Build with the shared `justfile`
 
-NXP provides a Docker-based flow that avoids a lot of host-package drift. Build the container from the Android tree:
-
-```bash
-cd "${MY_ANDROID}/device/nxp/common/dockerbuild"
-docker build --no-cache \
-  --build-arg userid="$(id -u)" \
-  --build-arg groupid="$(id -g)" \
-  --build-arg username="$(id -un)" \
-  -t android-build .
-```
-
-Start the build container:
+Run the shared build recipe from `/srv/android-automotive`:
 
 ```bash
-docker run --privileged -it \
-  -v "${MY_ANDROID}:/home/$(id -un)/android_src" \
-  android-build
+cd /srv/android-automotive
+just build
 ```
 
-Inside the container:
+That recipe handles:
 
-```bash
-cd ~/android_src
-source build/envsetup.sh
-lunch mek_8q_car2-nxp_stable-userdebug
-./imx-make.sh -j4 2>&1 | tee build-log.txt
-```
+- building the Docker image from the NXP source tree
+- starting the container with the shared source tree mounted at `/work/android_src`
+- running `lunch mek_8q_car2-nxp_stable-userdebug`
+- running `./imx-make.sh -j3`
 
 When the build completes, the output images should be under:
 
@@ -158,96 +227,100 @@ When the build completes, the output images should be under:
 ls -al "${MY_ANDROID}/out/target/product/mek_8q"
 ```
 
-## Optional: verify the fast flash path first
+## Publish build outputs
 
-If your immediate goal is to prove the board and cables are working, it can be useful to flash the matching prebuilt image package before attempting a full source build.
+Publishing build outputs should mean creating a stable release directory on the build server that the laptop can pull from later.
 
-Extract the prebuilt package into your workspace:
+For the current shared `justfile`, the publish target is:
+
+- `/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0`
+
+Run:
 
 ```bash
-cd ~/android-automotive
+cd /srv/android-automotive
+just publish
+```
+
+That should produce a directory shaped roughly like this:
+
+```text
+/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0/
+├── build-log.txt
+└── mek_8q/
+```
+
+The `mek_8q/` directory is copied from:
+
+- `/srv/android-automotive/imx-automotive-15.0.0_2.1.0/out/target/product/mek_8q`
+
+At minimum, the published release directory should contain:
+
+- the exact release or manifest used for the build
+- the full `mek_8q` output directory from the build
+- the build log
+
+Before handing the release off to the laptop workflow, verify the published directory exists:
+
+```bash
+ls -al /srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0
+ls -al /srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0/mek_8q
+```
+
+The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
+
+- `/srv/android-automotive/imx-automotive-15.0.0_2.1.0/out/target/product/mek_8q`
+
+That separation matters because it gives you:
+
+- a stable handoff point
+- a directory name tied to a specific NXP release
+- fewer mistakes when multiple builds or rebuilds exist on the server
+
+From the repo root on your laptop, you can pull the published release directory into local `/tmp` with:
+
+```bash
+just pull-build-artifacts user@host
+```
+
+That copies:
+
+- `/srv/android-automotive/releases/imx-automotive-15.0.0_2.1.0`
+
+to:
+
+- `/tmp/imx-automotive-15.0.0_2.1.0`
+
+## Optional: verify image contents before handoff
+
+Before handing artifacts to the laptop workflow, confirm the expected files exist:
+
+```bash
+ls -al "${MY_ANDROID}/out/target/product/mek_8q"
+```
+
+If you also keep NXP prebuilt image packages on the build server for reference, store them in the shared workspace too:
+
+```bash
+cd /srv/android-automotive
 tar -xzvf automotive-15.0.0_2.1.0_image_8qmek_car2.tar.gz
 cd automotive-15.0.0_2.1.0_image_8qmek_car2
 ```
 
-## Install UUU
-
-UUU is NXP's flashing tool:
-
-```bash
-mkdir -p ~/bin
-curl -L -o ~/bin/uuu \
-  https://github.com/nxp-imx/mfgtools/releases/download/uuu_1.5.201/uuu
-chmod +x ~/bin/uuu
-export PATH="$HOME/bin:$PATH"
-uuu -v
-```
-
-## Connect the board for flashing
-
-Before flashing:
-
-1. Put the MEK into serial download mode using the correct boot switch setting for your board.
-2. Connect the USB-C OTG port to the host machine.
-3. Connect the debug UART so you can watch boot logs.
-
-Verify that the serial adapter appears on the host:
-
-```bash
-ls /dev/ttyUSB*
-```
-
-Open a serial console:
-
-```bash
-sudo minicom -D /dev/ttyUSB0 -b 115200
-```
-
-## Flash the board
-
-From the extracted image package, run the flash script that matches your board revision:
-
-```bash
-# Example for i.MX 8QuadMax MEK rev C
-sudo ./uuu_imx_android_flash.sh -f imx8qm -e
-
-# Example for i.MX 8QuadMax MEK rev D
-sudo ./uuu_imx_android_flash.sh -f imx8qm -e -d revd
-```
-
-After flashing completes, switch the board back to eMMC boot mode and reboot it.
-
-## Validate the system
-
-Once the board is booted, run a minimal smoke test:
-
-```bash
-adb devices
-adb shell getprop ro.build.version.release
-adb shell ip addr show
-```
-
-A successful first bring-up usually means:
-
-- The board boots without obvious errors on the serial console
-- `adb devices` shows the target
-- The display comes up
-- Basic networking works
-
 ## Common failure points
 
-If setup or bring-up stalls, check these first:
+If setup or builds stall, check these first:
 
 - Not enough free disk space
 - Build host runs out of memory
-- Wrong NXP release bundle for the board or target image
-- Wrong board revision flag when flashing
-- `uuu` not present in `PATH`
-- Serial cable connected to the wrong port
-- Board left in download mode instead of normal boot mode
+- Wrong NXP release bundle or manifest for the target image
+- Workspace created inside one user's home directory
+- Build tools installed in user-local paths instead of shared system paths
+- Build server does not have the current `docs/public/build-server/justfile`
+- Docker permissions not configured for the build users
 
 ## Next step
 
-After the build server is working, continue with the demo app guide:
+After the build server is producing published images, continue with the laptop-side deployment and app workflow:
 
 - [Running the Demo App](./demo-app)

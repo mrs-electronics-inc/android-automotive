@@ -205,7 +205,7 @@ source ./imx_android_setup.sh
 export MY_ANDROID="$(pwd)"
 ```
 
-This step will take a long time because it performs the initial source fetch and repository setup. Expect it to take longer than half an hour.
+This step will take a long time because it performs the initial source fetch and repository setup. Expect it to take at least an hour.
 
 ## Build
 

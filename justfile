@@ -20,7 +20,7 @@ release := "imx-automotive-16.0.0_1.1.0"
 images_dir := workspace + "/releases/" + release
 
 push-build-server-file target file:
-    rsync -avz {{ file }} {{ target }}:{{ workspace }}/
+    rsync -avz -e 'ssh -S none' {{ file }} {{ target }}:{{ workspace }}/
 
 pull-build-artifacts target:
-    rsync -avz {{ target }}:{{ images_dir }}/ /tmp/{{ release }}/
+    rsync -avz -e 'ssh -S none' {{ target }}:{{ images_dir }}/ /tmp/{{ release }}/

@@ -57,9 +57,10 @@ sudo apt install -y \
   git \
   curl \
   unzip \
-  docker.io \
   just
 ```
+
+Install Docker separately using the official [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) instructions.
 
 Add your user to the Docker group if needed:
 
@@ -71,11 +72,15 @@ newgrp docker
 ## Create a shared workspace
 
 ```bash
+sudo groupadd --system android-build
+sudo usermod -aG android-build "$USER"
 sudo mkdir -p /srv/android-automotive
 sudo chgrp -R android-build /srv/android-automotive
 sudo chmod -R 2775 /srv/android-automotive
 cd /srv/android-automotive
 ```
+
+Add any future build-server users to the `android-build` group as well so they can work in the shared workspace.
 
 This directory will hold downloaded release archives, the extracted source tree, and generated build artifacts.
 

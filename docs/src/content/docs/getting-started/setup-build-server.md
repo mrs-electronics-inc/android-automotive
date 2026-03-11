@@ -258,6 +258,11 @@ cd /srv/android-automotive
 just build-logs
 ```
 
+:::note
+You can safely ignore messages that look like `find: ‘device/generic/armv7-a-neon/.git’: Permission denied`.
+These are normal.
+:::
+
 When the build completes, the output images should be under:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
@@ -266,6 +271,11 @@ When the build completes, the output images should be under:
 
 Publishing build outputs should mean creating a stable release directory on the
 build server that the laptop can pull from later.
+
+:::note
+This is a very simple "publish" process. In the future we will most likely
+implement a more sophisticated process depending on our needs for deployment.
+:::
 
 For the current shared `justfile`, the publish target is:
 

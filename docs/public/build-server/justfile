@@ -15,8 +15,6 @@ install-repo:
 extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
 
-build: build-container build-images
-
 build-container:
   cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
     --build-arg userid=$(id -u) \
@@ -24,7 +22,7 @@ build-container:
     --build-arg username=$(id -un) \
     -t android-build .
 
-build-images:
+build:
   rm -f {{build_log}}
   docker rm -f {{build_container}} 2>/dev/null || true
   docker run -d --name {{build_container}} --entrypoint /bin/bash --privileged -v {{source_tree}}:/work/android_src android-build -lc '\
@@ -38,8 +36,6 @@ build-status:
 
 build-logs:
   docker logs {{build_container}}
-
-publish: publish-artifacts
 
 publish-artifacts:
   mkdir -p {{images_dir}}

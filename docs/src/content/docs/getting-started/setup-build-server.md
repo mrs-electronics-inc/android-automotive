@@ -202,7 +202,6 @@ Then source the setup script included in the release:
 ```bash
 cd /srv/android-automotive/imx-automotive-16.0.0_1.1.0
 source ./imx_android_setup.sh
-export MY_ANDROID="$(pwd)"
 ```
 
 This step will take a long time because it performs the initial source fetch and repository setup. Expect it to take at least an hour.
@@ -215,14 +214,28 @@ After it completes, the Android source tree used for the build will be under:
 
 ## Build
 
-Start the build from `/srv/android-automotive`:
+First, you need to build the docker container. This creates a docker container image that you can use for containerized Android Automotive builds.
+
+```bash
+cd /srv/android-automotive
+just build-container
+```
+
+:::note
+You do not have to rebuild the docker container every build. It is a good idea
+to rebuild the docker container every few weeks, to make sure you have the latest
+versions of build dependencies in the docker container.
+:::
+
+Start the Android Automotive build from `/srv/android-automotive`:
 
 ```bash
 cd /srv/android-automotive
 just build
 ```
 
-This recipe starts the build in the background. It does not require you to keep the SSH session open while the build runs.
+This recipe starts the build in the background. It does not require you to
+keep the SSH session open while the build runs.
 
 The build workflow handles:
 
@@ -247,13 +260,12 @@ just build-logs
 
 When the build completes, the output images should be under:
 
-```bash
-ls -lah "${MY_ANDROID}/out/target/product/mek_8q"
-```
+`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
 ## Publish build outputs
 
-Publishing build outputs should mean creating a stable release directory on the build server that the laptop can pull from later.
+Publishing build outputs should mean creating a stable release directory on the
+build server that the laptop can pull from later.
 
 For the current shared `justfile`, the publish target is:
 
@@ -263,7 +275,7 @@ Run:
 
 ```bash
 cd /srv/android-automotive
-just publish
+just publish-artifacts
 ```
 
 That should produce a directory shaped roughly like this:
@@ -276,7 +288,7 @@ That should produce a directory shaped roughly like this:
 
 The `mek_8q/` directory is copied from:
 
-`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
+`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
 At minimum, the published release directory should contain:
 
@@ -293,7 +305,7 @@ just verify-artifacts
 
 The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
 
-`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/out/target/product/mek_8q`
+`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
 That separation matters because it gives you:
 

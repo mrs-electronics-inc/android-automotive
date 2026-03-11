@@ -24,6 +24,7 @@ build-container:
     -t android-build .
 
 build:
+  @echo "Fixing permissions on source tree..."
   @sudo chown -R {{userid}}:{{groupid}} {{source_tree}}
   @docker rm -f {{build_container}} 2>/dev/null || true
   @docker run -d \
@@ -33,7 +34,7 @@ build:
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
     android-build \
-    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j3 2>&1'
+    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j2 2>&1'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 

@@ -242,7 +242,11 @@ The build workflow handles:
 - building the Docker image from `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build`
 - starting a detached container with that `android_build` tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
-- running `./imx-make.sh -j3`
+- running `./imx-make.sh -j2`
+
+:::note
+The build uses `-j2` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
+:::
 
 To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.
 

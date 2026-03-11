@@ -34,7 +34,7 @@ build:
     android-build \
     -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j3 2>&1'
 
-  @echo "Build started. Use 'docker ps' to check status and 'docker logs {{build_container}}' to view output."
+  @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 
 clean-build:
   rm -rf {{source_tree}}/out

@@ -244,7 +244,7 @@ The build workflow handles:
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
 - running `./imx-make.sh -j3`
 
-To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs android-automotive-build`.
+To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.
 
 :::note
 You can safely ignore messages that look like `find: 'device/generic/armv7-a-neon/.git': Permission denied`.

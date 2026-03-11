@@ -24,9 +24,7 @@ build-container:
     -t android-build .
 
 build:
-  # Remove previous build container
-  docker rm -f {{build_container}} 2>/dev/null || true
-  # Run new build container in the background
+  @docker rm -f {{build_container}} 2>/dev/null || true
   @docker run -d \
     --name {{build_container}} \
     --entrypoint /bin/bash \

@@ -49,5 +49,5 @@ publish-artifacts:
   cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/
 
 verify-artifacts:
-  ls -al {{images_dir}}
-  ls -al {{images_dir}}/mek_8q
+  ls -lah {{images_dir}}
+  ls -lah {{images_dir}}/mek_8q

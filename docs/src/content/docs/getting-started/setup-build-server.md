@@ -244,22 +244,10 @@ The build workflow handles:
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
 - running `./imx-make.sh -j3`
 
-To check whether the detached container is still running:
-
-```bash
-cd /srv/android-automotive
-just build-status
-```
-
-To inspect the latest build output:
-
-```bash
-cd /srv/android-automotive
-just build-logs
-```
+To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs android-automotive-build`.
 
 :::note
-You can safely ignore messages that look like `find: ‘device/generic/armv7-a-neon/.git’: Permission denied`.
+You can safely ignore messages that look like `find: 'device/generic/armv7-a-neon/.git': Permission denied`.
 These are normal.
 :::
 
@@ -334,6 +322,22 @@ That copies:
 to:
 
 `/tmp/imx-automotive-16.0.0_1.1.0`
+
+## Clean up
+
+To remove build outputs from the source tree:
+
+```bash
+cd /srv/android-automotive
+just clean-build
+```
+
+To remove published artifacts:
+
+```bash
+cd /srv/android-automotive
+just clean-artifacts
+```
 
 ## Common failure points
 

@@ -34,7 +34,10 @@ build:
     android-build \
     -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j3 2>&1'
 
-  @echo "Build started. Use 'just build-logs' to view output and 'just build-status' to check progress."
+  @echo "Build started. Use 'docker ps' to check status and 'docker logs {{build_container}}' to view output."
+
+clean-build:
+  rm -rf {{source_tree}}/out
 
 build-status:
   docker ps -a --filter "name={{build_container}}" || true
@@ -45,6 +48,9 @@ build-logs:
 publish-artifacts:
   mkdir -p {{images_dir}}
   cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/
+
+clean-artifacts:
+  rm -rf {{images_dir}}
 
 verify-artifacts:
   ls -lah {{images_dir}}

@@ -39,8 +39,7 @@ build-logs:
 
 publish-artifacts:
   mkdir -p {{images_dir}}
-  cp -r {{workspace}}/{{release}}/out/target/product/mek_8q {{images_dir}}/
-  cp {{workspace}}/{{release}}/build-log.txt {{images_dir}}/ 2>/dev/null || true
+  cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/
 
 verify-artifacts:
   ls -al {{images_dir}}

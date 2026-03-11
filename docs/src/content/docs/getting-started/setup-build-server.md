@@ -292,7 +292,6 @@ That should produce a directory shaped roughly like this:
 
 ```text
 /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/
-├── build-log.txt
 └── mek_8q/
 ```
 
@@ -304,7 +303,6 @@ At minimum, the published release directory should contain:
 
 - the exact release or manifest used for the build
 - the full `mek_8q` output directory from the build
-- the build log
 
 Verify the published release directory with:
 

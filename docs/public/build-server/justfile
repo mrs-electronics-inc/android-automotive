@@ -24,6 +24,7 @@ build-container:
     -t android-build .
 
 build:
+  @sudo chown -R {{userid}}:{{groupid}} {{source_tree}}
   @docker rm -f {{build_container}} 2>/dev/null || true
   @docker run -d \
     --name {{build_container}} \

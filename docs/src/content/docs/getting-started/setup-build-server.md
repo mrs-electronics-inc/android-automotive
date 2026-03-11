@@ -214,7 +214,7 @@ After it completes, the Android source tree used for the build will be under:
 
 ## Build
 
-First, you need to build the docker container. This creates a docker container image that you can use for containerized Android Automotive builds.
+First, you need to build the docker container. This creates a docker container image that you can use for containerized Android Automotive builds. This build takes around 20 minutes.
 
 ```bash
 cd /srv/android-automotive

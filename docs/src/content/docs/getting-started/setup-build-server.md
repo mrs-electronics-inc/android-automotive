@@ -234,6 +234,16 @@ cd /srv/android-automotive
 just build
 ```
 
+:::note
+If `just build` fails with an error like `Unable to find image 'android-build:latest' locally` or `pull access denied for android-build`, the local build container image is missing on this server. This can happen on first setup or after Docker image cleanup/pruning removed it. Run:
+
+```bash
+cd /srv/android-automotive
+just build-container
+just build
+```
+:::
+
 This recipe starts the build in the background. It does not require you to
 keep the SSH session open while the build runs.
 

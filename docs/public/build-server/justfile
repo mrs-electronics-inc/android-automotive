@@ -41,12 +41,6 @@ build:
 clean-build:
   rm -rf {{source_tree}}/out
 
-build-status:
-  docker ps -a --filter "name={{build_container}}" || true
-
-build-logs:
-  docker logs {{build_container}}
-
 publish-artifacts:
   mkdir -p {{images_dir}}
   cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/

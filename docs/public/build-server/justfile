@@ -1,8 +1,9 @@
 workspace := "/srv/android-automotive"
 release := "imx-automotive-16.0.0_1.1.0"
-source_tree := workspace + "/" + release + "/android_build"
-images_dir := workspace + "/releases/" + release
+source_tree := workspace / release / "android_build"
+images_dir := workspace / "releases" / release
 build_container := "android-automotive-build"
+dockerfile := source_tree / "device" / "nxp" / "common" / "dockerbuild" / "Dockerfile"
 userid := `id -u`
 groupid := `getent group android-build | cut -d: -f3`
 
@@ -17,6 +18,16 @@ extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
 
 build-container:
+  # NXP's Dockerfile for this BSP release omits the `zip` package while AOSP/Soong
+  # build steps (for example external/guice munging) invoke `zip` during `just build`.
+  # This causes late failures after long build times: `zip: command not found`.
+  #
+  # To keep the workflow stable across fresh source bundle extracts, patch the
+  # Dockerfile in place before building the image. The check makes this idempotent.
+  @if ! grep -Eq '\bzip\b' {{dockerfile}}; then \
+    echo "Patching NXP Dockerfile to include zip (required by Soong/AOSP)"; \
+    sed -i 's/\bunzip\b/& zip/' {{dockerfile}}; \
+  fi
   cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
     --build-arg userid=$(id -u) \
     --build-arg groupid=$(id -g) \

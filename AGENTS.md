@@ -18,4 +18,4 @@ This project uses the [Specture System](https://github.com/specture-system/spect
 
 ### Never Do (hard stop)
 
-- Ammend commits
+- Amend commits

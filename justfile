@@ -17,7 +17,7 @@ run-docs:
 
 workspace := "/srv/android-automotive"
 release := "imx-automotive-16.0.0_1.1.0"
-images_dir := workspace + "/releases/" + release
+images_dir := workspace / "releases" / release
 
 push-build-server-file target file:
     rsync -avz -e 'ssh -S none' {{ file }} {{ target }}:{{ workspace }}/

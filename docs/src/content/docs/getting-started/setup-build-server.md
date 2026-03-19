@@ -36,6 +36,7 @@ This workflow assumes a dedicated build server with:
 - Ubuntu 24.04
 - 4 CPU cores
 - 32 GB RAM
+- 16 GB or more of swap configured
 - 450 GB of free disk space before the source bundle is extracted
 - Docker installed and usable by the build users
 
@@ -68,6 +69,32 @@ Add your user to the Docker group if needed:
 sudo usermod -aG docker "$USER"
 newgrp docker
 ```
+
+## Configure swap
+
+Android Automotive builds can exhaust memory during Soong bootstrap even when the
+main build runs with `-j1`. On a 32 GB build server, configure at least 16 GB of
+swap before running the first full build.
+
+One straightforward Ubuntu setup is a swapfile:
+
+```bash
+sudo fallocate -l 16G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Verify that swap is active:
+
+```bash
+swapon --show
+free -h
+```
+
+If this machine is shared or you continue to see build processes get killed, raise
+the swap size further or move the build to a host with more RAM.
 
 ## Create a shared workspace
 
@@ -258,11 +285,34 @@ The build workflow handles:
 The build uses `-j1` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
 :::
 
-To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.
+:::caution
+If the build eventually stops with a final `Killed` line, check whether Docker
+recorded an OOM kill:
 
-:::note
-If the build fails with `Killed`, run `sudo dmesg | grep -i "killed process" -A 2 -B 1` on the host to see whether the OOM killer terminated `soong_build`.
+```bash
+docker inspect android-automotive-build --format 'exit={{.State.ExitCode}} oom={{.State.OOMKilled}} err={{.State.Error}} finished={{.State.FinishedAt}}'
+```
+
+If `oom=true`, the host ran out of memory for this build. This can happen late in
+the run, including after an earlier phase appears to have completed successfully.
+Increase swap, confirm it is active with `swapon --show`, then retry the build:
+
+```bash
+cd /srv/android-automotive
+just build
+```
+
+If the resumed build fails again immediately or starts reporting inconsistent
+Soong or Ninja state, then clear `out` and retry from a clean build:
+
+```bash
+cd /srv/android-automotive
+just clean-build
+just build
+```
 :::
+
+To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.
 
 :::note
 You can safely ignore messages that look like `find: 'device/generic/armv7-a-neon/.git': Permission denied`.

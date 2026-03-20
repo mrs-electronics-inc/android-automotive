@@ -21,9 +21,6 @@ class MainActivity : Activity() {
     lateinit var mSpeedPropertyView: VehiclePropertyView
     lateinit var mBatteryLevelPropertyView: VehiclePropertyView
     lateinit var mFuelDoorOpenPropertyView: VehiclePropertyView
-    lateinit var mVendorTest1sCounterPropertyView: VehiclePropertyView
-    lateinit var mVendorTest500msCounterPropertyView: VehiclePropertyView
-    lateinit var mVendorTestSysPropPropertyView: VehiclePropertyView
     private lateinit var mCarPropertyManager: CarPropertyManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,51 +102,6 @@ class MainActivity : Activity() {
                     Log.e(TAG, "FUEL_DOOR_OPEN: setBooleanProperty(), Exception: " + e.message)
                 }
             }
-        mVendorTest1sCounterPropertyView = findViewById(R.id.vendor_test_1s_counter_property_view)
-        VendorVehiclePropertyIds.vendorTest1sCounter?.let { propertyId ->
-            mVendorTest1sCounterPropertyView.setPropId(propertyId)
-                .setPropName("VENDOR_TEST_1S_COUNTER")
-                .enableSetValue { valueToSet: String ->
-                    Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onEdit($valueToSet)")
-                    try {
-                        mCarPropertyManager.setIntProperty(propertyId, 0, valueToSet.toInt())
-                    } catch (e: SecurityException) {
-                        Log.e(TAG, "VENDOR_TEST_1S_COUNTER: setIntProperty(), Exception: " + e.message)
-                    } catch (e: IllegalArgumentException) {
-                        Log.e(TAG, "VENDOR_TEST_1S_COUNTER: setIntProperty(), Exception: " + e.message)
-                    }
-                }
-        } ?: mVendorTest1sCounterPropertyView.setPropName("VENDOR_TEST_1S_COUNTER (unavailable)")
-            .setPropValue("Unavailable")
-        mVendorTest500msCounterPropertyView =
-            findViewById(R.id.vendor_test_500ms_counter_property_view)
-        VendorVehiclePropertyIds.vendorTest500msCounter?.let { propertyId ->
-            mVendorTest500msCounterPropertyView.setPropId(propertyId)
-                .setPropName("VENDOR_TEST_500MS_COUNTER")
-                .enableSetValue { valueToSet: String ->
-                    Log.d(TAG, "VENDOR_TEST_500MS_COUNTER: onEdit($valueToSet)")
-                    try {
-                        mCarPropertyManager.setIntProperty(propertyId, 0, valueToSet.toInt())
-                    } catch (e: SecurityException) {
-                        Log.e(
-                            TAG,
-                            "VENDOR_TEST_500MS_COUNTER: setIntProperty(), Exception: " + e.message
-                        )
-                    } catch (e: IllegalArgumentException) {
-                        Log.e(
-                            TAG,
-                            "VENDOR_TEST_500MS_COUNTER: setIntProperty(), Exception: " + e.message
-                        )
-                    }
-                }
-        } ?: mVendorTest500msCounterPropertyView.setPropName("VENDOR_TEST_500MS_COUNTER (unavailable)")
-            .setPropValue("Unavailable")
-        mVendorTestSysPropPropertyView = findViewById(R.id.vendor_test_sys_prop_property_view)
-        VendorVehiclePropertyIds.vendorTestSysProp?.let { propertyId ->
-            mVendorTestSysPropPropertyView.setPropId(propertyId)
-                .setPropName("VENDOR_TEST_SYS_PROP")
-        } ?: mVendorTestSysPropPropertyView.setPropName("VENDOR_TEST_SYS_PROP (unavailable)")
-            .setPropValue("Unavailable")
     }
 
     private fun initCarPropertyManager() {
@@ -165,13 +117,6 @@ class MainActivity : Activity() {
             TAG,
             "GEAR_SELECTION: getIntProperty(" + VehiclePropertyIds.GEAR_SELECTION + ", 0)=" + gearSelection
         )
-        VendorVehiclePropertyIds.vendorTest1sCounter?.let { propertyId ->
-            val vendorTestCounter = mCarPropertyManager.getIntProperty(propertyId, 0)
-            Log.d(
-                TAG,
-                "VENDOR_TEST_1S_COUNTER: getIntProperty(" + propertyId + ", 0)=" + vendorTestCounter
-            )
-        }
     }
 
     private fun registerCarPropertyManagerCBs() {
@@ -216,45 +161,6 @@ class MainActivity : Activity() {
                 Log.d(TAG, "FUEL_DOOR_OPEN: onErrorEvent($propId, $zone)")
             }
         }, VehiclePropertyIds.FUEL_DOOR_OPEN, CarPropertyManager.SENSOR_RATE_ONCHANGE)
-        VendorVehiclePropertyIds.vendorTest1sCounter?.let { propertyId ->
-            mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-                override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                    Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onChangeEvent(" + carPropertyValue.value + ")")
-                    mVendorTest1sCounterPropertyView.setPropValue(carPropertyValue.value.toString())
-                }
-
-                override fun onErrorEvent(propId: Int, zone: Int) {
-                    Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onErrorEvent($propId, $zone)")
-                }
-            }, propertyId, 100f)
-        }
-        VendorVehiclePropertyIds.vendorTest500msCounter?.let { propertyId ->
-            mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-                override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                    Log.d(
-                        TAG,
-                        "VENDOR_TEST_500MS_COUNTER: onChangeEvent(" + carPropertyValue.value + ")"
-                    )
-                    mVendorTest500msCounterPropertyView.setPropValue(carPropertyValue.value.toString())
-                }
-
-                override fun onErrorEvent(propId: Int, zone: Int) {
-                    Log.d(TAG, "VENDOR_TEST_500MS_COUNTER: onErrorEvent($propId, $zone)")
-                }
-            }, propertyId, CarPropertyManager.SENSOR_RATE_NORMAL)
-        }
-        VendorVehiclePropertyIds.vendorTestSysProp?.let { propertyId ->
-            mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-                override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                    Log.d(TAG, "VENDOR_TEST_SYS_PROP: onChangeEvent(" + carPropertyValue.value + ")")
-                    mVendorTestSysPropPropertyView.setPropValue(carPropertyValue.value.toString())
-                }
-
-                override fun onErrorEvent(propId: Int, zone: Int) {
-                    Log.d(TAG, "VENDOR_TEST_SYS_PROP: onErrorEvent($propId, $zone)")
-                }
-            }, propertyId, CarPropertyManager.SENSOR_RATE_ONCHANGE)
-        }
     }
 
     companion object {

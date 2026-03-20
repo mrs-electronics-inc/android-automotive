@@ -30,20 +30,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.example.displayapp.VehiclePropertyView
-            android:id="@+id/vendor_test_1s_counter_property_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <com.example.displayapp.VehiclePropertyView
-            android:id="@+id/vendor_test_500ms_counter_property_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <com.example.displayapp.VehiclePropertyView
-            android:id="@+id/vendor_test_sys_prop_property_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
     </LinearLayout>
 </ScrollView>

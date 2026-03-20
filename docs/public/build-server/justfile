@@ -19,9 +19,17 @@ install-repo:
 extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
 
+device_mk := source_tree / "device" / "nxp" / "imx8q" / "mek_8q" / "mek_8q_car.mk"
+include_line := "-include device/mrs/overlays/overlays.mk"
+
 sync-overlays:
   mkdir -p {{overlays_dest}}
   rsync -av --delete {{overlays_src}}/ {{overlays_dest}}/
+  @if ! grep -qF '{{include_line}}' {{device_mk}}; then \
+    echo "" >> {{device_mk}}; \
+    echo "{{include_line}}" >> {{device_mk}}; \
+    echo "Patched {{device_mk}} to include MRS overlays"; \
+  fi
 
 build-container:
   # NXP's Dockerfile for this BSP release omits the `zip` package while AOSP/Soong
@@ -51,7 +59,7 @@ build: sync-overlays
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
     android-build \
-    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && PRODUCT_PACKAGES="$$PRODUCT_PACKAGES SystemOverlay SystemUiOverlay LauncherOverlay" ./imx-make.sh -j1 2>&1'
+    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j1 2>&1'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 

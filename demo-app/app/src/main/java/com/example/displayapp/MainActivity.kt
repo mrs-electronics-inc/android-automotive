@@ -9,7 +9,6 @@ import android.car.hardware.property.CarPropertyManager.CarPropertyEventCallback
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import vendor.nlab.vehicle.V1_0.VehicleProperty
 import java.util.Arrays
 import kotlin.Array
 import kotlin.IllegalArgumentException
@@ -17,22 +16,11 @@ import kotlin.Int
 import kotlin.IntArray
 import kotlin.String
 
-// For accessing vendor properties names (instead of using magic numbers)
-// AOSP:
-//      Add to Android.bp vehicle generated lib "vendor.nlab.vehicle-V1.0-java"
-//      - gen file: out/soong/.intermediates/vendor/nkh-lab/interfaces/vehicle/1.0/vendor.nlab.vehicle-V1.0-java_gen_java/gen/srcs/vendor/nlab/vehicle/V1_0/VehicleProperty.java
-// gradle:
-//      Add AOSP vehicle generated lib to project, e.g:
-//      - from: out/soong/.intermediates/vendor/nkh-lab/interfaces/automotive/vehicle/1.0/vendor.nlab.vehicle-V1.0-java/android_common/javac/vendor.nlab.vehicle-V1.0-java.jar
-//      - to: app/libs
 class MainActivity : Activity() {
     lateinit var mGearPropertyView: VehiclePropertyView
     lateinit var mSpeedPropertyView: VehiclePropertyView
     lateinit var mBatteryLevelPropertyView: VehiclePropertyView
     lateinit var mFuelDoorOpenPropertyView: VehiclePropertyView
-    lateinit var mVendorTest1sCounterPropertyView: VehiclePropertyView
-    lateinit var mVendorTest500msCounterPropertyView: VehiclePropertyView
-    lateinit var mVendorTestSysPropPropertyView: VehiclePropertyView
     private lateinit var mCarPropertyManager: CarPropertyManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,50 +102,6 @@ class MainActivity : Activity() {
                     Log.e(TAG, "FUEL_DOOR_OPEN: setBooleanProperty(), Exception: " + e.message)
                 }
             }
-        mVendorTest1sCounterPropertyView = findViewById(R.id.vendor_test_1s_counter_property_view)
-        mVendorTest1sCounterPropertyView.setPropId(VehicleProperty.VENDOR_TEST_1S_COUNTER)
-            .setPropName("VENDOR_TEST_1S_COUNTER")
-            .enableSetValue { value_to_set: String ->
-                Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onEdit($value_to_set)")
-                try {
-                    mCarPropertyManager.setIntProperty(
-                        VehicleProperty.VENDOR_TEST_1S_COUNTER,
-                        0,
-                        value_to_set.toInt()
-                    )
-                } catch (e: SecurityException) {
-                    Log.e(TAG, "VENDOR_TEST_1S_COUNTER: setIntProperty(), Exception: " + e.message)
-                } catch (e: IllegalArgumentException) {
-                    Log.e(TAG, "VENDOR_TEST_1S_COUNTER: setIntProperty(), Exception: " + e.message)
-                }
-            }
-        mVendorTest500msCounterPropertyView =
-            findViewById(R.id.vendor_test_500ms_counter_property_view)
-        mVendorTest500msCounterPropertyView.setPropId(VehicleProperty.VENDOR_TEST_500MS_COUNTER)
-            .setPropName("VENDOR_TEST_500MS_COUNTER")
-            .enableSetValue { value_to_set: String ->
-                Log.d(TAG, "VENDOR_TEST_500MS_COUNTER: onEdit($value_to_set)")
-                try {
-                    mCarPropertyManager.setIntProperty(
-                        VehicleProperty.VENDOR_TEST_500MS_COUNTER,
-                        0,
-                        value_to_set.toInt()
-                    )
-                } catch (e: SecurityException) {
-                    Log.e(
-                        TAG,
-                        "VENDOR_TEST_500MS_COUNTER: setIntProperty(), Exception: " + e.message
-                    )
-                } catch (e: IllegalArgumentException) {
-                    Log.e(
-                        TAG,
-                        "VENDOR_TEST_500MS_COUNTER: setIntProperty(), Exception: " + e.message
-                    )
-                }
-            }
-        mVendorTestSysPropPropertyView = findViewById(R.id.vendor_test_sys_prop_property_view)
-        mVendorTestSysPropPropertyView.setPropId(VehicleProperty.VENDOR_TEST_SYS_PROP)
-            .setPropName("VENDOR_TEST_SYS_PROP")
     }
 
     private fun initCarPropertyManager() {
@@ -172,12 +116,6 @@ class MainActivity : Activity() {
         Log.d(
             TAG,
             "GEAR_SELECTION: getIntProperty(" + VehiclePropertyIds.GEAR_SELECTION + ", 0)=" + gearSelection
-        )
-        val vendorTestCounter =
-            mCarPropertyManager.getIntProperty(VehicleProperty.VENDOR_TEST_1S_COUNTER, 0)
-        Log.d(
-            TAG,
-            "VENDOR_TEST_1S_COUNTER: getIntProperty(" + VehicleProperty.VENDOR_TEST_1S_COUNTER + ", 0)=" + vendorTestCounter
         )
     }
 
@@ -223,39 +161,6 @@ class MainActivity : Activity() {
                 Log.d(TAG, "FUEL_DOOR_OPEN: onErrorEvent($propId, $zone)")
             }
         }, VehiclePropertyIds.FUEL_DOOR_OPEN, CarPropertyManager.SENSOR_RATE_ONCHANGE)
-        mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onChangeEvent(" + carPropertyValue.value + ")")
-                mVendorTest1sCounterPropertyView.setPropValue(carPropertyValue.value.toString())
-            }
-
-            override fun onErrorEvent(propId: Int, zone: Int) {
-                Log.d(TAG, "VENDOR_TEST_1S_COUNTER: onErrorEvent($propId, $zone)")
-            }
-        }, VehicleProperty.VENDOR_TEST_1S_COUNTER, 100f)
-        mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                Log.d(
-                    TAG,
-                    "VENDOR_TEST_500MS_COUNTER: onChangeEvent(" + carPropertyValue.value + ")"
-                )
-                mVendorTest500msCounterPropertyView.setPropValue(carPropertyValue.value.toString())
-            }
-
-            override fun onErrorEvent(propId: Int, zone: Int) {
-                Log.d(TAG, "VENDOR_TEST_500MS_COUNTER: onErrorEvent($propId, $zone)")
-            }
-        }, VehicleProperty.VENDOR_TEST_500MS_COUNTER, CarPropertyManager.SENSOR_RATE_NORMAL)
-        mCarPropertyManager.registerCallback(object : CarPropertyEventCallback {
-            override fun onChangeEvent(carPropertyValue: CarPropertyValue<*>) {
-                Log.d(TAG, "VENDOR_TEST_SYS_PROP: onChangeEvent(" + carPropertyValue.value + ")")
-                mVendorTestSysPropPropertyView.setPropValue(carPropertyValue.value.toString())
-            }
-
-            override fun onErrorEvent(propId: Int, zone: Int) {
-                Log.d(TAG, "VENDOR_TEST_SYS_PROP: onErrorEvent($propId, $zone)")
-            }
-        }, VehicleProperty.VENDOR_TEST_SYS_PROP, CarPropertyManager.SENSOR_RATE_ONCHANGE)
     }
 
     companion object {

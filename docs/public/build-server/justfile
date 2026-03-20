@@ -25,7 +25,7 @@ include_line := "-include device/mrs/overlays/overlays.mk"
 sync-overlays:
   mkdir -p {{overlays_dest}}
   rsync -av --delete {{overlays_src}}/ {{overlays_dest}}/
-  @if ! grep -qF '{{include_line}}' {{device_mk}}; then \
+  @if ! grep -qF -- '{{include_line}}' {{device_mk}}; then \
     echo "" >> {{device_mk}}; \
     echo "{{include_line}}" >> {{device_mk}}; \
     echo "Patched {{device_mk}} to include MRS overlays"; \

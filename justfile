@@ -51,7 +51,7 @@ verify-deploy-artifacts:
     @echo "Artifacts verified in {{ local_images_dir }}"
 
 flash-android-automotive: verify-deploy-artifacts
-    sudo bash {{ local_images_dir }}/uuu_imx_android_flash.sh -f imx8qm -u md -d md -D {{ local_images_dir }}
+    sudo bash {{ local_images_dir }}/uuu_imx_android_flash.sh -f imx8qm -e -u md -d md -D {{ local_images_dir }}
 
 reflash-android-automotive: verify-deploy-artifacts
     sudo bash {{ local_images_dir }}/fastboot_imx_flashall.sh -f imx8qm -e -u md -d md -D {{ local_images_dir }}

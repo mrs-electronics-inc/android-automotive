@@ -82,7 +82,7 @@ From the repo root on your laptop, run:
 just flash-android-automotive
 ```
 
-That command verifies the local published artifacts and starts the flash process.
+That command verifies the local published artifacts, starts the flash process, and wipes userdata.
 
 ### Switch the board back to eMMC boot
 

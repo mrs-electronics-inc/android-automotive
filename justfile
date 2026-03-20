@@ -34,12 +34,17 @@ verify-deploy-artifacts:
         boot-imx.img \
         init_boot.img \
         vendor_boot.img \
+        vendor_boot-debug.img \
         super.img \
+        super_empty.img \
         partition-table.img \
+        partition-table-13GB.img \
+        partition-table-dual.img \
+        partition-table-13GB-dual.img \
         dtbo.img \
-        dtbo-imx8qm-md.img \
+        dtbo-*.img \
         vbmeta.img \
-        vbmeta-imx8qm-md.img \
+        vbmeta-*.img \
         u-boot-imx8qm.imx \
         u-boot-imx8qm-md.imx \
         u-boot-imx8qm-mek-uuu.imx \

@@ -5,7 +5,7 @@ sidebar:
 description: Prepare a Linux build machine for Android Automotive work with the NXP i.MX 8QuadMax MEK.
 ---
 
-This guide gets a shared Linux machine ready to build Android Automotive images for the NXP i.MX 8QuadMax MEK.
+This guide gets a shared Linux machine ready to build Android Automotive images for the NXP i.MX8 QuadMax MEK.
 
 This machine is treated as a build server, not the day-to-day development workstation.
 

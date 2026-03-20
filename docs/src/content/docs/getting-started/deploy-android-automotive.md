@@ -28,6 +28,8 @@ Make sure you have:
 - a USB cable connected to the board's **USB 3.0 Type-C / OTG** port
 - optional but strongly recommended: a debug UART connection so you can watch boot logs
 
+If the board does not enumerate over USB-C at first, press the board's reset button (`SW3`) after connecting the cable and after setting the boot switches for download mode. On this hardware, the OTG port may only appear to the host after reset.
+
 Pull the published artifacts from your laptop with:
 
 ```bash
@@ -73,6 +75,8 @@ Set the board to download mode before starting the initial handoff to UUU.
 Connect your laptop to the board's **USB 3.0 Type-C / OTG** port.
 
 Do not use the debug UART or USB 2.0 host port for flashing.
+
+If the port does not appear in `lsusb` immediately, press `SW3` reset on the board to force USB re-enumeration.
 
 ### Flash from the laptop
 

@@ -46,6 +46,7 @@ verify-deploy-artifacts:
       ; do \
         test -f "$file" || { echo "Missing required artifact: $file"; exit 1; }; \
       done
+    @cd {{ local_images_dir }} && test -f u-boot-imx8qm.imx || cp -n u-boot-imx8qm-mek-uuu.imx u-boot-imx8qm.imx
     @echo "Artifacts verified in {{ local_images_dir }}"
 
 flash-android-automotive: verify-deploy-artifacts

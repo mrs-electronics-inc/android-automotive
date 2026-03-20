@@ -2,14 +2,14 @@
 title: Flash OS
 sidebar:
   order: 2
-description: Flash a built Android Automotive image onto the NXP i.MX 8QuadMax MEK.
+description: Flash a built Android Automotive image onto the NXP i.MX8 QuadMax MEK.
 ---
 
-This guide covers flashing a built Android Automotive OS image onto the NXP i.MX 8QuadMax MEK board.
+This guide covers flashing a built Android Automotive OS image onto the NXP i.MX8 QuadMax MEK board.
 
 This workflow is intentionally focused on the following setup:
 
-- C-series i.MX 8QuadMax MEK board
+- C-series i.MX8 QuadMax MEK board
 - the multi-display image set with HDMI infotainment output
 
 ## Before you start

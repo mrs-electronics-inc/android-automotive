@@ -1,5 +1,5 @@
 ---
-title: Deploy Android Automotive
+title: Flash OS
 sidebar:
   order: 2
 description: Flash a built Android Automotive image onto the NXP i.MX 8QuadMax MEK.
@@ -10,15 +10,15 @@ This guide covers flashing a built Android Automotive OS image onto the NXP i.MX
 This workflow is intentionally focused on the following setup:
 
 - C-series i.MX 8QuadMax MEK board
-- local artifacts at `/tmp/imx-automotive-16.0.0_1.1.0/mek_8q`
 - the multi-display image set with HDMI infotainment output
 
 ## Before you start
 
 Make sure you have:
 
-- a completed build published on the build server
+- a completed build published on the [build server](/getting-started/setup-build-server/)
 - physical access to the MEK board
+- `uuu` and `fastboot` available on your laptop `PATH`
 - a USB cable connected to the board's **USB 3.0 Type-C / OTG** port
 - optional but strongly recommended: a second USB cable connected to the board's **micro-USB debug UART** port so you can watch boot logs
 
@@ -26,8 +26,6 @@ The MEK uses two different USB connections in this workflow:
 
 - use the **USB 3.0 Type-C / OTG** port for `uuu`, `fastboot`, and normal device enumeration
 - use the **micro-USB debug UART** port for serial console access during boot
-
-If the board does not enumerate over USB-C at first, press the board's reset button (`SW3`) after connecting the cable and after setting the boot switches for download mode. On this hardware, the OTG port may only appear to the host after reset.
 
 Pull the published artifacts from your laptop with:
 
@@ -47,36 +45,18 @@ Verify the local artifact set with:
 just verify-deploy-artifacts
 ```
 
-## Required host tools
-
-Make sure your laptop has:
-
-- `uuu` on your laptop `PATH`
-- `fastboot` on your laptop `PATH`
-
-The published `mek_8q` directory should contain the NXP helper scripts, the `md` DTBO/VBMeta images, and the matching `md` U-Boot image. `just verify-deploy-artifacts` checks the required set for this workflow.
-
 ## Full flash from serial download mode
 
 This is the most reliable path when you want to replace the full OS image on the board.
 
 ### Put the board into serial download mode
 
-1. set `SW2` to `001000` on bits `1-6`
+1. set `SW2` to `001000`
 2. connect the board for flashing
-3. press `SW3` if you need to force USB re-enumeration on the OTG port
-
-### Connect the correct USB port
-
-Connect your laptop to the board's **USB 3.0 Type-C / OTG** port.
-
-Do not use the debug UART or USB 2.0 host port for flashing.
-
-If the port does not appear in `lsusb` immediately, press `SW3` reset on the board to force USB re-enumeration.
 
 ### Flash from the laptop
 
-From the repo root on your laptop, run:
+If the OTG port does not re-enumerate after setting `SW2`, press `SW3` to force USB re-enumeration, then, from the repo root on your laptop, run:
 
 ```bash
 just flash-android-automotive
@@ -86,10 +66,10 @@ That command verifies the local published artifacts, starts the flash process, a
 
 ### Switch the board back to eMMC boot
 
-1. set `SW2` to `000100` on bits `1-6`
+1. set `SW2` to `000100`
 2. press `SW3` to reboot the board into normal eMMC boot
 
-The first boot can take several minutes.
+The first boot takes about 2.5 minutes. Later boots usually take less than a minute.
 
 ## Verify the new boot
 
@@ -102,7 +82,6 @@ After switching back to eMMC boot and powering the board on:
 Once Android finishes booting, verify the device is reachable from your laptop:
 
 ```bash
-adb wait-for-device
 adb devices
 adb shell getprop ro.build.fingerprint
 ```
@@ -129,40 +108,17 @@ just reflash-android-automotive
 
 Use this path only when the device is already unlocked and can reliably enter fastboot mode.
 
-## Flashing one image for debugging
-
-If you only need to replace one image, use plain `fastboot` instead of reflashing the whole board.
-
-Examples:
-
-```bash
-fastboot flash boot_a boot.img
-fastboot flash boot_b boot.img
-fastboot flash vendor_boot_a vendor_boot.img
-fastboot flash vendor_boot_b vendor_boot.img
-```
-
-For dynamic partitions such as `system_a`, the board must be in **userspace fastboot** rather than only U-Boot fastboot.
-
-NXP documents this sequence:
-
-```bash
-fastboot reboot fastboot
-fastboot flash system_a system.img
-```
-
-Use this only for targeted debug work. For normal OS deployment, prefer `fastboot_imx_flashall.sh`.
-
 ## Common failure points
 
 - Wrong `SW2` boot-mode setting for the current step
+  - Use `001000` for serial download flashing and `000100` for normal eMMC boot.
 - USB cable connected to the wrong port
+  - Use the board's **USB 3.0 Type-C / OTG** port for flashing.
 - Missing required published artifacts under `/tmp/imx-automotive-16.0.0_1.1.0/mek_8q`
-- Host `fastboot` too old for the image set
-- Attempting to flash from the live build tree instead of the published artifact directory
+  - Rerun `just pull-build-artifacts user@host` and `just verify-deploy-artifacts`.
 
 ## References
 
-- [Setup Build Server](./setup-build-server)
+- [Setup Build Server](/getting-started/setup-build-server/)
 - [NXP Android Automotive Quick Start Guide (UG10177)](https://www.nxp.com/docs/en/user-guide/UG10177.pdf)
 - [NXP Android Automotive User's Guide (UG10176)](https://www.nxp.com/docs/en/user-guide/UG10176.pdf)

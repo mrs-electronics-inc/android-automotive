@@ -67,7 +67,7 @@ publish-artifacts:
       vbmeta-*.img \
       u-boot-imx8qm-mek-uuu.imx \
     ; do \
-      cp -v "$$pattern" {{images_dir}}/mek_8q/ 2>/dev/null || true; \
+      cp -v $pattern {{images_dir}}/mek_8q/ 2>/dev/null || true; \
     done
 
 clean-artifacts:

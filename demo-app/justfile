@@ -1,0 +1,25 @@
+apk := "app/build/outputs/apk/debug/app-debug.apk"
+package := "com.example.displayapp.debug"
+activity := "com.example.displayapp.MainActivity"
+
+default:
+    @just --list
+
+build:
+    ./gradlew assembleDebug
+
+install: build
+    adb install -r {{ apk }}
+
+launch:
+    adb shell am start -n {{ package }}/{{ activity }}
+
+force-stop:
+    adb shell am force-stop {{ package }}
+
+redeploy: install
+    @just force-stop
+    @just launch
+
+uninstall:
+    adb uninstall {{ package }}

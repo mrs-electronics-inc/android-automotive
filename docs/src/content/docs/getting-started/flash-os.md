@@ -19,6 +19,7 @@ Make sure you have:
 - a completed build published on the [build server](/getting-started/setup-build-server/)
 - physical access to the MEK board
 - `uuu` and `fastboot` available on your laptop `PATH`
+  - If you use nix, you can use `nix develop` to access the packages
 - a USB cable connected to the board's **USB 3.0 Type-C / OTG** port
 - optional but strongly recommended: a second USB cable connected to the board's **micro-USB debug UART** port so you can watch boot logs
 

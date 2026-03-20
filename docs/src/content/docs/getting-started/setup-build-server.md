@@ -2,7 +2,7 @@
 title: Setup Build Server
 sidebar:
   order: 1
-description: Prepare a Linux build machine for Android Automotive work with the NXP i.MX 8QuadMax MEK.
+description: Prepare a Linux build machine for Android Automotive work with the NXP i.MX8 QuadMax MEK.
 ---
 
 This guide gets a shared Linux machine ready to build Android Automotive images for the NXP i.MX8 QuadMax MEK.
@@ -328,11 +328,6 @@ When the build completes, the output images should be under:
 Publishing build outputs should mean creating a stable release directory on the
 build server that the laptop can pull from later.
 
-:::note
-This is a very simple "publish" process. In the future we will most likely
-implement a more sophisticated process depending on our needs for deployment.
-:::
-
 For the current shared `justfile`, the publish target is:
 
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
@@ -349,16 +344,29 @@ That should produce a directory shaped roughly like this:
 ```text
 /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/
 └── mek_8q/
+    ├── boot.img
+    ├── boot-imx.img
+    ├── init_boot.img
+    ├── vendor_boot.img
+    ├── vendor_boot-debug.img
+    ├── super.img
+    ├── super_empty.img
+    ├── partition-table.img
+    ├── partition-table-13GB.img
+    ├── partition-table-dual.img
+    ├── partition-table-13GB-dual.img
+    ├── dtbo.img
+    ├── dtbo-*.img
+    ├── vbmeta.img
+    ├── vbmeta-*.img
+    ├── u-boot-imx8qm-mek-uuu.imx
+    ├── uuu_imx_android_flash.sh
+    └── fastboot_imx_flashall.sh
 ```
 
-The `mek_8q/` directory is copied from:
+These files are copied from:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
-
-At minimum, the published release directory should contain:
-
-- the exact release or manifest used for the build
-- the full `mek_8q` output directory from the build
 
 Verify the published release directory with:
 
@@ -366,30 +374,6 @@ Verify the published release directory with:
 cd /srv/android-automotive
 just verify-artifacts
 ```
-
-The laptop-side workflow should treat this published directory as the source of truth for flashing and inspection, rather than reaching back into the live build tree under:
-
-`/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
-
-That separation matters because it gives you:
-
-- a stable handoff point
-- a directory name tied to a specific NXP release
-- fewer mistakes when multiple builds or rebuilds exist on the server
-
-Run this recipe from the repo root on your laptop to pull the published release directory into local `/tmp`:
-
-```bash
-just pull-build-artifacts user@host
-```
-
-That copies:
-
-`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
-
-to:
-
-`/tmp/imx-automotive-16.0.0_1.1.0`
 
 ## Clean up
 

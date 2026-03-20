@@ -1,7 +1,7 @@
 ---
 title: Running the Demo App
 sidebar:
-  order: 2
+  order: 3
 description: Information for getting started with the MRS Android Automotive demo app.
 ---
 

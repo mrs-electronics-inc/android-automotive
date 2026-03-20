@@ -329,8 +329,9 @@ Publishing build outputs should mean creating a stable release directory on the
 build server that the laptop can pull from later.
 
 :::note
-This is a very simple "publish" process. In the future we will most likely
-implement a more sophisticated process depending on our needs for deployment.
+This is a deliberately small publish process. The release directory should contain
+only the flashable images needed on the laptop, not the entire Android product
+output tree.
 :::
 
 For the current shared `justfile`, the publish target is:
@@ -349,16 +350,26 @@ That should produce a directory shaped roughly like this:
 ```text
 /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/
 └── mek_8q/
+    ├── boot.img
+    ├── vendor_boot.img
+    ├── super.img
+    ├── partition-table.img
+    ├── bootloader-imx8qm.img
+    ├── spl-imx8qm.bin
+    ├── dtbo-*.img
+    ├── vbmeta-*.img
+    └── u-boot-imx8qm-mek-uuu.imx
 ```
 
-The `mek_8q/` directory is copied from:
+These files are copied from:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
 At minimum, the published release directory should contain:
 
-- the exact release or manifest used for the build
-- the full `mek_8q` output directory from the build
+- the bootloader and partition images needed for a full flash
+- the DTBO/VBMeta variants needed for your board/display configuration
+- the `u-boot-imx8qm-mek-uuu.imx` loader image used by UUU
 
 Verify the published release directory with:
 
@@ -376,6 +387,7 @@ That separation matters because it gives you:
 - a stable handoff point
 - a directory name tied to a specific NXP release
 - fewer mistakes when multiple builds or rebuilds exist on the server
+- a much smaller transfer to the laptop than copying the entire `mek_8q` output directory
 
 Run this recipe from the repo root on your laptop to pull the published release directory into local `/tmp`:
 

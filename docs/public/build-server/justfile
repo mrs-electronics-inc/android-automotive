@@ -53,8 +53,22 @@ clean-build:
   rm -rf {{source_tree}}/out
 
 publish-artifacts:
-  mkdir -p {{images_dir}}
-  cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/
+  rm -rf {{images_dir}}
+  mkdir -p {{images_dir}}/mek_8q
+  cd {{source_tree}}/out/target/product/mek_8q && \
+    for pattern in \
+      boot.img \
+      vendor_boot.img \
+      super.img \
+      partition-table.img \
+      bootloader-imx8qm.img \
+      spl-imx8qm.bin \
+      dtbo-*.img \
+      vbmeta-*.img \
+      u-boot-imx8qm-mek-uuu.imx \
+    ; do \
+      cp -v "$$pattern" {{images_dir}}/mek_8q/ 2>/dev/null || true; \
+    done
 
 clean-artifacts:
   rm -rf {{images_dir}}

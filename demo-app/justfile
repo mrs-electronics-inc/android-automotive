@@ -11,7 +11,7 @@ build:
 install: build
     adb install -r {{ apk }}
 
-launch:
+run:
     adb shell am start -n {{ package }}/{{ activity }}
 
 force-stop:
@@ -19,7 +19,7 @@ force-stop:
 
 redeploy: install
     @just force-stop
-    @just launch
+    @just run
 
 uninstall:
     adb uninstall {{ package }}

@@ -50,12 +50,12 @@ just demo-app/install
 
 This builds and installs the app.
 
-### Launch the app from the CLI
+### Run the app from the CLI
 
 The debug build uses the package name `com.example.displayapp.debug`. Start it with:
 
 ```bash
-just demo-app/launch
+just demo-app/run
 ```
 
 If you want to restart from a clean app process first:

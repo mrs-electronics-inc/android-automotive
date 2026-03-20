@@ -27,7 +27,7 @@ The MEK uses two different USB connections in this workflow:
 - use the **USB 3.0 Type-C / OTG** port for `uuu`, `fastboot`, and normal device enumeration
 - use the **micro-USB debug UART** port for serial console access during boot
 
-Pull the published artifacts from your laptop with:
+Pull the published artifacts from the build server by running the following on your laptop:
 
 ```bash
 just pull-build-artifacts user@host

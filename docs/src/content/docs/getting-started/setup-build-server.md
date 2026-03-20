@@ -241,7 +241,7 @@ After it completes, the Android source tree used for the build will be under:
 
 ## Push overlays
 
-This repo includes custom runtime resource overlays (RROs) under `os/overlays/` that brand the system UI. Push them to the build server before building:
+This repo includes custom runtime resource overlays (RROs) under `os/overlays/`. Push them to the build server before building:
 
 ```bash
 just push-overlays user@host
@@ -249,7 +249,7 @@ just push-overlays user@host
 
 This copies the overlay source to `/srv/android-automotive/overlays/` on the build server. The `just build` recipe automatically syncs them into the source tree at `device/mrs/overlays/` and patches the device makefile to include them via `overlays.mk`.
 
-If you have not pushed overlays yet, the build still works — it just produces a stock NXP image without MRS branding.
+If you have not pushed overlays yet, the build still works — it just produces a stock NXP image without any customizations.
 
 ## Build
 

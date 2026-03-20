@@ -7,17 +7,11 @@ description: Flash a built Android Automotive image onto the NXP i.MX 8QuadMax M
 
 This guide covers flashing a built Android Automotive OS image onto the NXP i.MX 8QuadMax MEK board.
 
-In this project, "deploy the OS" means:
-
-1. Build and publish artifacts on the build server.
-2. Pull the published `mek_8q` flash image directory onto your laptop.
-3. Flash those images from your laptop to the dev board.
-
 This workflow is intentionally focused on the following setup:
 
-- multi-display image set
 - C-series i.MX 8QuadMax MEK board
 - local artifacts at `/tmp/imx-automotive-16.0.0_1.1.0/mek_8q`
+- the multi-display image set with HDMI infotainment output
 
 ## Before you start
 
@@ -26,7 +20,12 @@ Make sure you have:
 - a completed build published on the build server
 - physical access to the MEK board
 - a USB cable connected to the board's **USB 3.0 Type-C / OTG** port
-- optional but strongly recommended: a debug UART connection so you can watch boot logs
+- optional but strongly recommended: a second USB cable connected to the board's **micro-USB debug UART** port so you can watch boot logs
+
+The MEK uses two different USB connections in this workflow:
+
+- use the **USB 3.0 Type-C / OTG** port for `uuu`, `fastboot`, and normal device enumeration
+- use the **micro-USB debug UART** port for serial console access during boot
 
 If the board does not enumerate over USB-C at first, press the board's reset button (`SW3`) after connecting the cable and after setting the boot switches for download mode. On this hardware, the OTG port may only appear to the host after reset.
 
@@ -55,20 +54,17 @@ Make sure your laptop has:
 - `uuu` on your laptop `PATH`
 - `fastboot` on your laptop `PATH`
 
-The published `mek_8q` directory should contain the NXP helper scripts and the `md` DTBO/VBMeta images. `just verify-deploy-artifacts` checks the required set for this workflow.
+The published `mek_8q` directory should contain the NXP helper scripts, the `md` DTBO/VBMeta images, and the matching `md` U-Boot image. `just verify-deploy-artifacts` checks the required set for this workflow.
 
-## Recommended flow for a full OS flash
+## Full flash from serial download mode
 
 This is the most reliable path when you want to replace the full OS image on the board.
 
 ### Put the board into serial download mode
 
-For the i.MX 8QuadMax MEK, NXP's current documentation says:
-
-- `SW2 = 001000` on bits `1-6` for download mode
-- `SW2 = 000100` on bits `1-6` for normal eMMC boot
-
-Set the board to download mode before starting the initial handoff to UUU.
+1. set `SW2` to `001000` on bits `1-6`
+2. connect the board for flashing
+3. press `SW3` if you need to force USB re-enumeration on the OTG port
 
 ### Connect the correct USB port
 
@@ -86,24 +82,36 @@ From the repo root on your laptop, run:
 just flash-android-automotive
 ```
 
-That recipe:
-
-- verifies the local published artifacts
-- runs `uuu_imx_android_flash.sh` with `-d md`
-- runs `fastboot_imx_flashall.sh` with `-d md`
-- wipes userdata with `-e`
+That command verifies the local published artifacts and starts the flash process.
 
 ### Switch the board back to eMMC boot
 
-After flashing completes:
-
-1. power the board off
-2. change `SW2` back to `000100` on bits `1-6`
-3. power the board on again
+1. set `SW2` to `000100` on bits `1-6`
+2. press `SW3` to reboot the board into normal eMMC boot
 
 The first boot can take several minutes.
 
-## Faster flow when the board already boots into a developer image
+## Verify the new boot
+
+After switching back to eMMC boot and powering the board on:
+
+1. confirm the board reaches Android on the attached display or in the UART boot log
+2. watch the boot on the attached display or over the debug UART if you have it connected
+3. wait through the first boot, which can take several minutes after a full flash
+
+Once Android finishes booting, verify the device is reachable from your laptop:
+
+```bash
+adb wait-for-device
+adb devices
+adb shell getprop ro.build.fingerprint
+```
+
+You should see the board listed by `adb devices`, and `getprop` should return a non-empty build fingerprint from the newly flashed image.
+
+If you have a specific change to validate, this is the right point to confirm it on the device before moving on.
+
+## Reflash from fastboot mode
 
 If the board already boots and you only need to reflash a new build, you may not need serial download mode first.
 
@@ -111,12 +119,6 @@ Boot the board into **U-Boot fastboot mode** first. For example, from the Androi
 
 ```bash
 adb reboot fastboot
-```
-
-Or, if you are already at the U-Boot console:
-
-```text
-fastboot 0
 ```
 
 Then run:

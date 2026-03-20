@@ -1,0 +1,64 @@
+workspace := "/srv/android-automotive"
+release := "imx-automotive-16.0.0_1.1.0"
+source_tree := workspace / release / "android_build"
+images_dir := workspace / "releases" / release
+build_container := "android-automotive-build"
+dockerfile := source_tree / "device" / "nxp" / "common" / "dockerbuild" / "Dockerfile"
+userid := `id -u`
+groupid := `getent group android-build | cut -d: -f3`
+
+default:
+  @just --list
+
+install-repo:
+  sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
+  sudo chmod +x /usr/local/bin/repo
+
+extract-bsp archive=(release + ".tar.gz"):
+  cd {{workspace}} && tar -xzvf {{archive}}
+
+build-container:
+  # NXP's Dockerfile for this BSP release omits the `zip` package while AOSP/Soong
+  # build steps (for example external/guice munging) invoke `zip` during `just build`.
+  # This causes late failures after long build times: `zip: command not found`.
+  #
+  # To keep the workflow stable across fresh source bundle extracts, patch the
+  # Dockerfile in place before building the image. The check makes this idempotent.
+  @if ! grep -Eq '\bzip\b' {{dockerfile}}; then \
+    echo "Patching NXP Dockerfile to include zip (required by Soong/AOSP)"; \
+    sed -i 's/\bunzip\b/& zip/' {{dockerfile}}; \
+  fi
+  cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
+    --build-arg userid=$(id -u) \
+    --build-arg groupid=$(id -g) \
+    --build-arg username=$(id -un) \
+    -t android-build .
+
+build:
+  @echo "Fixing permissions on source tree..."
+  @sudo find {{source_tree}} ! -group {{groupid}} -print0 | xargs -0 -r chgrp -hv {{groupid}} 2>/dev/null || true
+  @docker rm -f {{build_container}} 2>/dev/null || true
+  @docker run -d \
+    --name {{build_container}} \
+    --entrypoint /bin/bash \
+    --privileged \
+    -u {{userid}}:{{groupid}} \
+    -v {{source_tree}}:/work/android_src \
+    android-build \
+    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j1 2>&1'
+
+  @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
+
+clean-build:
+  rm -rf {{source_tree}}/out
+
+publish-artifacts:
+  mkdir -p {{images_dir}}
+  cp -r {{source_tree}}/out/target/product/mek_8q {{images_dir}}/
+
+clean-artifacts:
+  rm -rf {{images_dir}}
+
+verify-artifacts:
+  ls -lah {{images_dir}}
+  ls -lah {{images_dir}}/mek_8q

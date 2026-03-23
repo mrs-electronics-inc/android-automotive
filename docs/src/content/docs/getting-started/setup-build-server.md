@@ -372,8 +372,7 @@ That should produce a directory shaped roughly like this:
     ├── vbmeta.img
     ├── vbmeta-*.img
     ├── u-boot-imx8qm-mek-uuu.imx
-    ├── uuu_imx_android_flash.sh
-    └── fastboot_imx_flashall.sh
+    └── uuu_imx_android_flash.sh
 ```
 
 These files are copied from:

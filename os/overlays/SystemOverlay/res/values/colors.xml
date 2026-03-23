@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Override the default system accent color with MRS brand blue -->
-    <color name="accent_device_default_light">#2272B4</color>
-    <color name="accent_device_default_dark">#2272B4</color>
-</resources>

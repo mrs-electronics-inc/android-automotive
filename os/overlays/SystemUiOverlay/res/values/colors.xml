@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Notification shade / system bar background -->
-    <color name="system_bar_background_opaque">#FF1A3A5C</color>
-</resources>

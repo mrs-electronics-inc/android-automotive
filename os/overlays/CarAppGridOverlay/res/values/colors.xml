@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Accent elements exposed by the CarAppGrid overlayable -->
-    <color name="page_indicator_bar_color">#FF2272B4</color>
-    <color name="app_item_on_hover_border_color">#FF2272B4</color>
-    <color name="app_item_on_hover_background_color">#3D2272B4</color>
-    <color name="banner_background_color">#1A3A5C</color>
-    <color name="banner_button_text_color">#2272B4</color>
-</resources>

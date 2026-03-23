@@ -247,7 +247,7 @@ This repo includes OS customizations under `os/`, including runtime resource ove
 just push-os-customizations user@host
 ```
 
-This copies the entire `os/` tree to `/srv/android-automotive/os/` on the build server. The `just build` recipe automatically syncs it into the source tree at `device/mrs/`, then patches the device makefile to include `device/mrs/mrs.mk`, which is the single integration entry point for MRS OS customizations.
+This copies the entire `os/` tree to `/srv/android-automotive/os/` on the build server. The `just build` recipe automatically syncs it into the source tree at `device/mrs/`, then patches `device/nxp/imx8q/mek_8q/mek_8q_car2.mk` to include `device/mrs/mrs.mk`, which is the single integration entry point for MRS OS customizations.
 
 If you have not pushed these customizations yet, the build still works, but it produces a stock NXP image without the MRS overlays or bundled system apps.
 

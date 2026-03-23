@@ -1,4 +1,4 @@
 runtime_resource_overlay {
-    name: "LauncherOverlay",
+    name: "CarAppGridOverlay",
     sdk_version: "current",
 }

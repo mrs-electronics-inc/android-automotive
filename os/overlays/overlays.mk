@@ -1,6 +1,6 @@
 PRODUCT_PACKAGES += \
-    CarServiceOverlay \
+    CarAppGridOverlay \
+    CarLauncherOverlay \
     CarServiceUpdatableOverlay \
     SystemOverlay \
-    SystemUiOverlay \
-    LauncherOverlay
+    SystemUiOverlay

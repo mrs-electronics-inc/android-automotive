@@ -19,7 +19,7 @@ install-repo:
 extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
 
-device_mk := source_tree / "device" / "nxp" / "imx8q" / "mek_8q" / "mek_8q_car.mk"
+device_mk := source_tree / "device" / "nxp" / "imx8q" / "mek_8q" / "mek_8q_car2.mk"
 include_line := "-include device/mrs/mrs.mk"
 
 sync-os:

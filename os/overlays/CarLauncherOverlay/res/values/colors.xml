@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Card background exposed by the CarLauncher overlayable -->
+    <color name="card_background_scrim">#1A3A5C</color>
+</resources>

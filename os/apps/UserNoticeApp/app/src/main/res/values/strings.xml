@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">User Notice</string>
-    <string name="user_notice_title">Safety Notice</string>
-    <string name="user_notice_message">Vehicle functions may be limited during startup. Verify the vehicle is safe to operate before driving.</string>
-    <string name="user_notice_continue">Continue</string>
-</resources>

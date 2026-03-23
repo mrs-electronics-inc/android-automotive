@@ -1,3 +1,2 @@
 PRODUCT_PACKAGES += \
-    CarSystemUiBarsOverlay \
-    CarServiceUpdatableOverlay
+    CarSystemUiBarsOverlay

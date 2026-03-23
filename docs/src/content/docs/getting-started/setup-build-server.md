@@ -239,17 +239,17 @@ After it completes, the Android source tree used for the build will be under:
 /srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build
 ```
 
-## Push overlays
+## Push OS customizations
 
-This repo includes custom runtime resource overlays (RROs) under `os/overlays/`. Push them to the build server before building:
+This repo includes OS customizations under `os/`, including runtime resource overlays in `os/overlays/` and system apps in `os/apps/`. Push them to the build server before building:
 
 ```bash
-just push-overlays user@host
+just push-os-customizations user@host
 ```
 
-This copies the overlay source to `/srv/android-automotive/overlays/` on the build server. The `just build` recipe automatically syncs them into the source tree at `device/mrs/overlays/` and patches the device makefile to include them via `overlays.mk`.
+This copies the entire `os/` tree to `/srv/android-automotive/os/` on the build server. The `just build` recipe automatically syncs it into the source tree at `device/mrs/`, then patches the device makefile to include `device/mrs/mrs.mk`, which is the single integration entry point for MRS OS customizations.
 
-If you have not pushed overlays yet, the build still works — it just produces a stock NXP image without any customizations.
+If you have not pushed these customizations yet, the build still works, but it produces a stock NXP image without the MRS overlays or bundled system apps.
 
 ## Build
 

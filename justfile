@@ -24,8 +24,8 @@ local_images_dir := local_release_dir / "mek_8q"
 push-build-server-file target file:
     rsync -avz -e 'ssh -S none' {{ file }} {{ target }}:{{ workspace }}/
 
-push-overlays target:
-    rsync -avz --delete -e 'ssh -S none' os/overlays/ {{ target }}:{{ workspace }}/overlays/
+push-os-customizations target:
+    rsync -avz --delete -e 'ssh -S none' os/ {{ target }}:{{ workspace }}/os/
 
 pull-build-artifacts target:
     rsync -avz -e 'ssh -S none' {{ target }}:{{ images_dir }}/ {{ local_release_dir }}/

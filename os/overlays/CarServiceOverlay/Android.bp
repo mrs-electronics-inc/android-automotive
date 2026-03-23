@@ -1,0 +1,4 @@
+runtime_resource_overlay {
+    name: "CarServiceOverlay",
+    sdk_version: "current",
+}

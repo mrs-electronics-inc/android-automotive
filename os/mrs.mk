@@ -1,0 +1,2 @@
+-include device/mrs/apps/apps.mk
+-include device/mrs/overlays/overlays.mk

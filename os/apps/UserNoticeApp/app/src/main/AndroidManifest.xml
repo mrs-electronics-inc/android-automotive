@@ -9,6 +9,7 @@
         android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert">
         <service
             android:name=".BasicUserNoticeService"
+            android:directBootAware="true"
             android:exported="true" />
     </application>
 

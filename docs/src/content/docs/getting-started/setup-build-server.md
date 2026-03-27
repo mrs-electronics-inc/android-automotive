@@ -239,6 +239,18 @@ After it completes, the Android source tree used for the build will be under:
 /srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build
 ```
 
+## Push OS customizations
+
+This repo includes OS customizations under `os/`. Push them to the build server before building:
+
+```bash
+just push-os-customizations user@host
+```
+
+This copies the entire `os/` tree to `/srv/android-automotive/os/` on the build server. The `just build` recipe automatically syncs it into the source tree at `device/mrs/`, then patches `device/nxp/imx8q/mek_8q/mek_8q_car2.mk` to include `device/mrs/mrs.mk`, which is the single integration entry point for MRS OS customizations.
+
+If you have not pushed these customizations yet, the build still works, but it produces a stock NXP image without the MRS OS customizations.
+
 ## Build
 
 First, you need to build the docker container. This creates a docker container image that you can use for containerized Android Automotive builds. This build takes around 20 minutes.
@@ -360,8 +372,7 @@ That should produce a directory shaped roughly like this:
     ├── vbmeta.img
     ├── vbmeta-*.img
     ├── u-boot-imx8qm-mek-uuu.imx
-    ├── uuu_imx_android_flash.sh
-    └── fastboot_imx_flashall.sh
+    └── uuu_imx_android_flash.sh
 ```
 
 These files are copied from:

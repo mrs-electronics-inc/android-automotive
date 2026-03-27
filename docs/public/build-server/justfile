@@ -4,6 +4,8 @@ source_tree := workspace / release / "android_build"
 images_dir := workspace / "releases" / release
 build_container := "android-automotive-build"
 dockerfile := source_tree / "device" / "nxp" / "common" / "dockerbuild" / "Dockerfile"
+os_src := workspace / "os"
+os_dest := source_tree / "device" / "mrs"
 userid := `id -u`
 groupid := `getent group android-build | cut -d: -f3`
 
@@ -16,6 +18,18 @@ install-repo:
 
 extract-bsp archive=(release + ".tar.gz"):
   cd {{workspace}} && tar -xzvf {{archive}}
+
+device_mk := source_tree / "device" / "nxp" / "imx8q" / "mek_8q" / "mek_8q_car2.mk"
+include_line := "-include device/mrs/mrs.mk"
+
+sync-os:
+  mkdir -p {{os_dest}}
+  rsync -av --delete {{os_src}}/ {{os_dest}}/
+  @if ! grep -qF -- '{{include_line}}' {{device_mk}}; then \
+    echo "" >> {{device_mk}}; \
+    echo "{{include_line}}" >> {{device_mk}}; \
+    echo "Patched {{device_mk}} to include MRS OS customizations"; \
+  fi
 
 build-container:
   # NXP's Dockerfile for this BSP release omits the `zip` package while AOSP/Soong
@@ -34,7 +48,7 @@ build-container:
     --build-arg username=$(id -un) \
     -t android-build .
 
-build:
+build: sync-os
   @echo "Fixing permissions on source tree..."
   @sudo find {{source_tree}} ! -group {{groupid}} -print0 | xargs -0 -r chgrp -hv {{groupid}} 2>/dev/null || true
   @docker rm -f {{build_container}} 2>/dev/null || true
@@ -76,7 +90,6 @@ publish-artifacts:
       u-boot-imx8qm-md.imx \
       u-boot-imx8qm-mek-uuu.imx \
       uuu_imx_android_flash.sh \
-      fastboot_imx_flashall.sh \
     ; do \
       cp -v $pattern {{images_dir}}/mek_8q/ 2>/dev/null || true; \
     done

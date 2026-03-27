@@ -91,24 +91,6 @@ You should see the board listed by `adb devices`, and `getprop` should return a 
 
 If you have a specific change to validate, this is the right point to confirm it on the device before moving on.
 
-## Reflash from fastboot mode
-
-If the board already boots and you only need to reflash a new build, you may not need serial download mode first.
-
-Boot the board into **U-Boot fastboot mode** first. For example, from the Android OS side:
-
-```bash
-adb reboot fastboot
-```
-
-Then run:
-
-```bash
-just reflash-android-automotive
-```
-
-Use this path only when the device is already unlocked and can reliably enter fastboot mode.
-
 ## Common failure points
 
 - Wrong `SW2` boot-mode setting for the current step

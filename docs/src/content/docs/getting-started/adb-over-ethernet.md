@@ -26,17 +26,9 @@ This means a freshly flashed board with the MRS OS customizations should be reac
 
 ### Find the board's Ethernet IP address
 
-You can find the IP address in three ways:
+You can find the IP address in two ways:
 
-**Option 1: Check the board's Settings (GUI)**
-
-1. On the board's display, open **Settings**
-2. Navigate to **System** → **About**
-3. Look for **IP address** or **Ethernet** status
-
-The exact menu path may vary depending on the build, but it's typically displayed in the system information or network status section.
-
-**Option 2: Check via UART console or existing `adb` shell**
+**Option 1: Check via UART console or existing `adb` shell**
 
 If you have serial console access or an existing USB connection, run:
 
@@ -46,7 +38,7 @@ ip -4 addr show eth0
 
 Look for the line with `inet` (e.g., `inet 192.168.1.100/24`) to find the IP address.
 
-**Option 3: Check your router's DHCP client list**
+**Option 2: Check your router's DHCP client list**
 
 If the board obtained an IP via DHCP, the MAC address and IP assignment may be visible in your router's admin interface.
 

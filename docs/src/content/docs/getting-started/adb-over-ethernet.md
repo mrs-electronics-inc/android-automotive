@@ -39,30 +39,11 @@ adb devices
 
 You should see the board listed as `<board-ip>:5555    device`.
 
-## Manual setup on a stock image
-
-If you're working with a board that doesn't have the MRS OS customizations baked in, you can enable adb over TCP at runtime. You need a root shell — either over the UART serial console or via `adb root` from your laptop over USB.
-
-From a root shell on the device:
-
-```bash
-setprop persist.adb.tcp.port 5555
-setprop ctl.restart adbd
-```
-
-The `ctl.restart` form is preferred over `stop adbd && start adbd` because it's handled by `init` rather than `adbd` itself, so it works even from inside an `adb shell` session that's about to be killed by the restart.
-
-After the restart, connect from your laptop as above.
-
 ## Common failure points
 
-- `setprop: failed to set property` or property reads back empty
-  - The shell is not running as root. From the UART console run `su` first; from `adb` run `adb root` on the laptop side. Check `whoami` returns `root` before retrying.
-- `start adbd` reports `must be root` over the serial console
-  - The serial console drops you in as the `shell` user. Run `su` first to elevate.
 - `adb connect` returns `Connection refused`
-  - `adbd` is running but isn't listening on TCP. Confirm with `getprop persist.adb.tcp.port` and `getprop init.svc.adbd` on the device. If the property is empty, re-run the setprop step from a root shell.
-- USB `adb` stops working after a failed restart
+  - `adbd` is running but isn't listening on TCP. Confirm with `getprop persist.adb.tcp.port` and `getprop init.svc.adbd` on the device. The property should be `5555` on an MRS image; if it's empty, the OS build did not apply the override.
+- USB `adb` stops working
   - Reboot the board from the UART console (`reboot`) or power cycle it. On the laptop side run `adb kill-server` and `adb devices` to re-enumerate.
 
 ## References

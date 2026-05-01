@@ -38,15 +38,3 @@ adb devices
 ```
 
 You should see the board listed as `<board-ip>:5555    device`.
-
-## Common failure points
-
-- `adb connect` returns `Connection refused`
-  - `adbd` is running but isn't listening on TCP. Confirm with `getprop persist.adb.tcp.port` and `getprop init.svc.adbd` on the device. The property should be `5555` on an MRS image; if it's empty, the OS build did not apply the override.
-- USB `adb` stops working
-  - Reboot the board from the UART console (`reboot`) or power cycle it. On the laptop side run `adb kill-server` and `adb devices` to re-enumerate.
-
-## References
-
-- [Flash OS](/getting-started/flash-os/)
-- [AOSP adbd source — property lookup order](https://android.googlesource.com/platform/system/adb/+/refs/heads/main/daemon/main.cpp)

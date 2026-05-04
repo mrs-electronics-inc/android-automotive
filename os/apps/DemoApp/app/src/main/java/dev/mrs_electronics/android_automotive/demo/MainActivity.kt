@@ -1,4 +1,4 @@
-package com.example.displayapp
+package dev.mrs_electronics.android_automotive.demo
 
 import android.app.Activity
 import android.car.Car
@@ -164,7 +164,7 @@ class MainActivity : Activity() {
     }
 
     companion object {
-        private const val TAG = "display-app"
+        private const val TAG = "mrs-demo"
         private const val REQUEST_CODE_ASK_PERMISSIONS = 1
     }
 }

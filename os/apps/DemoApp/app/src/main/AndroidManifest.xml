@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.mrs_electronics.android_automotive.demo">
 
     <!--
     Car service permissions in AOSP project tree are described in:
@@ -43,7 +44,7 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
         <activity
-            android:name="com.example.displayapp.MainActivity"
+            android:name="dev.mrs_electronics.android_automotive.demo.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.example.displayapp
+package dev.mrs_electronics.android_automotive.demo
 
 import android.app.AlertDialog
 import android.content.Context

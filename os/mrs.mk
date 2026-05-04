@@ -4,6 +4,10 @@
 # See setup-build-server.md for details on how the build server syncs customizations.
 -include device/mrs/overlays/overlays.mk
 
+# OS customizations
+PRODUCT_PACKAGES += \
+    GaugeCluster
+
 # Make adbd listen on TCP port 5555 at boot so adb is reachable over Ethernet
 # without manual tweaks
 PRODUCT_SYSTEM_PROPERTIES += \

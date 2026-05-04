@@ -18,7 +18,7 @@ Make sure you have:
 
 ## How it works
 
-The MRS OS build sets `persist.adb.tcp.port=5555` via `PRODUCT_PROPERTY_OVERRIDES` in [os/mrs.mk](https://github.com/mrs-electronics-inc/android-automotive/blob/main/os/mrs.mk). On boot, `adbd` reads this property and listens on TCP port 5555 in addition to USB.
+The MRS OS build sets `service.adb.tcp.port=5555` and `persist.adb.tcp.port=5555` via `PRODUCT_SYSTEM_PROPERTIES` in [os/mrs.mk](https://github.com/mrs-electronics-inc/android-automotive/blob/main/os/mrs.mk). On boot, `adbd` reads `service.adb.tcp.port` first and falls back to `persist.adb.tcp.port`, so it listens on TCP port 5555 in addition to USB.
 
 This means a freshly flashed board with the MRS OS customizations should be reachable over the network without any per-boot setup.
 

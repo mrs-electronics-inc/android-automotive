@@ -6,5 +6,6 @@
 
 # Make adbd listen on TCP port 5555 at boot so adb is reachable over Ethernet
 # without first connecting via USB and running `adb tcpip 5555`.
-PRODUCT_PROPERTY_OVERRIDES += \
+PRODUCT_SYSTEM_PROPERTIES += \
+    service.adb.tcp.port=5555 \
     persist.adb.tcp.port=5555

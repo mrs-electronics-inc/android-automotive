@@ -416,6 +416,6 @@ If setup or builds stall, check these first:
 
 ## Next step
 
-After the build server is producing published images, continue with the laptop-side deployment and app workflow:
+After the build server is producing published images, continue with:
 
-- [Running the Demo App](./demo-app)
+- [Flash OS](./flash-os)

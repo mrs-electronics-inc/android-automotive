@@ -19,3 +19,4 @@ This project uses the [Specture System](https://github.com/specture-system/spect
 ### Never Do (hard stop)
 
 - Amend commits
+- Patch files directly on the build server — all changes must go through the OS customizations under `os/` on this repo and be pushed to the build server via `just push-os-customizations`

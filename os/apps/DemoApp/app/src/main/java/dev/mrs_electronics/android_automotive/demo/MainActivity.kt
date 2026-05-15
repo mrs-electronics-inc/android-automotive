@@ -106,7 +106,7 @@ class MainActivity : Activity() {
 
     private fun initCarPropertyManager() {
         mCarPropertyManager =
-            Car.createCar(this).getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
+            Car.createCar(this)!!.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
     }
 
     private fun testGetProperties() {

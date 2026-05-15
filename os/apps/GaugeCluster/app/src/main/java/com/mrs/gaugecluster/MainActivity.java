@@ -46,17 +46,13 @@ public class MainActivity extends AppCompatActivity {
         mRangeText = findViewById(R.id.range_value);
         mRpmText = findViewById(R.id.rpm_value);
 
-        mCar = Car.createCar(this, (car, ready) -> {
-            if (!ready) {
-                Log.e(TAG, "Car service not ready");
-                return;
-            }
-            mCarPropertyManager = (CarPropertyManager) car.getCarManager(Car.PROPERTY_SERVICE);
-            if (mCarPropertyManager != null) {
-                subscribeToProperties();
-            }
-        });
-        mCar.connect();
+        mCar = Car.createCar(this);
+        mCarPropertyManager = (CarPropertyManager) mCar.getCarManager(Car.PROPERTY_SERVICE);
+        if (mCarPropertyManager != null) {
+            subscribeToProperties();
+        } else {
+            Log.e(TAG, "Car property manager unavailable");
+        }
     }
 
     private void subscribeToProperties() {
@@ -84,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         switch (propId) {
             case VehiclePropertyIds.FUEL_LEVEL:
-                float fuelCapacity = mCarPropertyManager.getProperty(
-                        VehiclePropertyIds.INFO_FUEL_CAPACITY, 0).getValue();
+                float fuelCapacity = ((Number) mCarPropertyManager.getProperty(
+                        VehiclePropertyIds.INFO_FUEL_CAPACITY, 0).getValue()).floatValue();
                 if (fuelCapacity > 0) {
                     int fuelPercent = Math.round(floatValue / fuelCapacity * 100f);
                     mFuelText.setText(fuelPercent + "%");
@@ -111,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
         if (mCarPropertyManager != null) {
             mCarPropertyManager.unregisterCallback(mCarPropertyCallback);
         }
-        mCar.disconnect();
+        if (mCar != null) {
+            mCar.disconnect();
+        }
     }
 }

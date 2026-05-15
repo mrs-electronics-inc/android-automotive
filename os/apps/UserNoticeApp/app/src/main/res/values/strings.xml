@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">User Notice</string>
+    <string name="usernotice">Before using this vehicle, review and accept the safety and usage notice for this system.</string>
+    <string name="dismiss_now">Dismiss now</string>
+    <string name="dismiss_forever">Do not show again</string>
+</resources>

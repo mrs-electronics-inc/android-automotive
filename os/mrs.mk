@@ -7,7 +7,8 @@
 # OS customizations
 PRODUCT_PACKAGES += \
     DemoApp \
-    GaugeCluster
+    GaugeCluster \
+    UserNoticeApp
 
 # Make adbd listen on TCP port 5555 at boot so adb is reachable over Ethernet
 # without manual tweaks

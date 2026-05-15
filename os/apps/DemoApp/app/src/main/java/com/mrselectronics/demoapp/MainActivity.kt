@@ -1,4 +1,4 @@
-package dev.mrs_electronics.android_automotive.demo
+package com.mrselectronics.demoapp
 
 import android.app.Activity
 import android.car.Car

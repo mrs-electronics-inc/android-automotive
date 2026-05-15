@@ -8,24 +8,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".MainActivity">
+        tools:context="com.mrselectronics.demoapp.MainActivity">
 
-        <dev.mrs_electronics.android_automotive.demo.VehiclePropertyView
+        <com.mrselectronics.demoapp.VehiclePropertyView
             android:id="@+id/gear_property_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <dev.mrs_electronics.android_automotive.demo.VehiclePropertyView
+        <com.mrselectronics.demoapp.VehiclePropertyView
             android:id="@+id/speed_property_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <dev.mrs_electronics.android_automotive.demo.VehiclePropertyView
+        <com.mrselectronics.demoapp.VehiclePropertyView
             android:id="@+id/battery_level_property_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <dev.mrs_electronics.android_automotive.demo.VehiclePropertyView
+        <com.mrselectronics.demoapp.VehiclePropertyView
             android:id="@+id/fuel_door_property_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

@@ -1,4 +1,4 @@
-package com.mrs.gaugecluster;
+package com.mrselectronics.gaugecluster;
 
 import android.car.Car;
 import android.car.VehiclePropertyIds;

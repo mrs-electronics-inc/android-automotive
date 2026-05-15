@@ -36,7 +36,7 @@ This workflow assumes a dedicated build server with:
 - Ubuntu 24.04
 - 4 CPU cores
 - 32 GB RAM
-- 16 GB or more of swap configured
+- 32 GB or more of swap configured
 - 450 GB of free disk space before the source bundle is extracted
 - Docker installed and usable by the build users
 
@@ -73,13 +73,13 @@ newgrp docker
 ## Configure swap
 
 Android Automotive builds can exhaust memory during Soong bootstrap even when the
-main build runs with `-j1`. On a 32 GB build server, configure at least 16 GB of
+main build runs with `-j2`. On a 32 GB build server, configure at least 32 GB of
 swap before running the first full build.
 
 One straightforward Ubuntu setup is a swapfile:
 
 ```bash
-sudo fallocate -l 16G /swapfile
+sudo fallocate -l 32G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
@@ -281,6 +281,7 @@ cd /srv/android-automotive
 just build-container
 just build
 ```
+
 :::
 
 This recipe starts the build in the background. It does not require you to
@@ -291,10 +292,10 @@ The build workflow handles:
 - building the Docker image from `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build`
 - starting a detached container with that `android_build` tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
-- running `./imx-make.sh -j1`
+- running `./imx-make.sh -j2`
 
 :::note
-The build uses `-j1` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
+The build uses `-j2` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
 :::
 
 :::caution
@@ -322,6 +323,7 @@ cd /srv/android-automotive
 just clean-build
 just build
 ```
+
 :::
 
 To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.

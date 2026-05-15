@@ -59,7 +59,7 @@ build: sync-os
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
     android-build \
-    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j1 2>&1'
+    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j2 2>&1'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 

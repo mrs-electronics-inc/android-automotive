@@ -17,7 +17,7 @@ class GaugeView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(R.color.system_ui_blue)
+        color = context.getColor(R.color.system_ui_blue_bright)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }

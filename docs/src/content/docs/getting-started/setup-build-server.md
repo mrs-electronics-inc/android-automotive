@@ -350,41 +350,6 @@ When the build completes, the output images should be under:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
-## App-only builds
-
-For changes that only touch app code, use the app build recipe instead of the
-full OS build:
-
-```bash
-cd /srv/android-automotive
-just build-app <module>
-```
-
-That recipe still syncs `os/` into the Android source tree, but it only builds
-the requested module and publishes the APK into:
-
-`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/<module>.apk`
-
-It also writes a matching `build-time.txt` file into
-`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/`
-so app rebuild timing stays attached to the APK artifact.
-
-Replace `<module>` with the app name you want to rebuild, such as
-`GaugeCluster` or `UserNoticeApp`.
-
-On your laptop, pull the app artifacts with:
-
-```bash
-just pull-build-app-artifacts user@host
-```
-
-Then install the APK with `adb install -r` against the local copy in:
-
-`build-artifacts/imx-automotive-16.0.0_1.1.0/apps/<module>/<module>.apk`
-
-If Android rejects the package update, fall back to the full OS build and
-flash path.
-
 ## Build outputs
 
 When `just build` finishes successfully, it publishes the release artifacts
@@ -394,8 +359,6 @@ directly into:
 
 The build timing summary lives alongside those files as
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/build-time.txt`.
-For app-only builds, look in
-`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/build-time.txt`.
 
 The directory should be shaped roughly like this:
 

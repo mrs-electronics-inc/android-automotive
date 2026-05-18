@@ -293,6 +293,7 @@ The build workflow handles:
 - starting a detached container with that `android_build` tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
 - running `./imx-make.sh -j2`
+- publishing the finished artifacts into `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q/`
 
 :::note
 The build uses `-j2` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
@@ -318,6 +319,14 @@ just build
 If the resumed build fails again immediately or starts reporting inconsistent
 Soong or Ninja state, then clear `out` and retry from a clean build:
 
+After a successful build, the release artifacts are already in:
+
+```text
+/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q
+```
+
+You can use `just verify-artifacts` on the build server to confirm the copied files.
+
 ```bash
 cd /srv/android-automotive
 just clean-build
@@ -337,23 +346,14 @@ When the build completes, the output images should be under:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
-## Publish build outputs
+## Build outputs
 
-Publishing build outputs should mean creating a stable release directory on the
-build server that the laptop can pull from later.
-
-For the current shared `justfile`, the publish target is:
+When `just build` finishes successfully, it publishes the release artifacts
+directly into:
 
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
-Run:
-
-```bash
-cd /srv/android-automotive
-just publish-artifacts
-```
-
-That should produce a directory shaped roughly like this:
+The directory should be shaped roughly like this:
 
 ```text
 /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/

@@ -191,7 +191,7 @@ class MainActivity : AppCompatActivity() {
             2 -> "R"
             4 -> "P"
             8 -> "D"
-            else -> gearValue.toString()
+            else -> "?"
         }
     }
 

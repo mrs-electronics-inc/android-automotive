@@ -30,9 +30,11 @@ push-os-customizations target:
     rsync -avz --delete -e 'ssh -S none' os/ {{ target }}:{{ workspace }}/os/
 
 pull-build-artifacts target:
+    mkdir -p {{ local_release_dir }}
     rsync -avz -e 'ssh -S none' {{ target }}:{{ images_dir }}/ {{ local_release_dir }}/
 
 pull-build-app-artifacts target:
+    mkdir -p {{ local_apps_dir }}
     rsync -avz -e 'ssh -S none' {{ target }}:{{ apps_dir }}/ {{ local_apps_dir }}/
 
 install-app-artifact module:

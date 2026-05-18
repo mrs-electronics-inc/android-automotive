@@ -16,7 +16,6 @@ public class GaugeView extends View {
 
     private final Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mTrackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint mNeedlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF mArcBounds = new RectF();
@@ -45,9 +44,6 @@ public class GaugeView extends View {
         mArcPaint.setColor(Color.rgb(0, 255, 120));
         mArcPaint.setStyle(Paint.Style.STROKE);
         mArcPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        mNeedlePaint.setColor(Color.WHITE);
-        mNeedlePaint.setStrokeCap(Paint.Cap.ROUND);
 
         mTextPaint.setColor(Color.WHITE);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -84,7 +80,6 @@ public class GaugeView extends View {
 
         mTrackPaint.setStrokeWidth(strokeWidth);
         mArcPaint.setStrokeWidth(strokeWidth);
-        mNeedlePaint.setStrokeWidth(size * 0.018f);
         mTextPaint.setTextSize(size * 0.17f);
         mLabelPaint.setTextSize(size * 0.075f);
 
@@ -92,19 +87,32 @@ public class GaugeView extends View {
         canvas.drawArc(mArcBounds, START_ANGLE, SWEEP_ANGLE, false, mTrackPaint);
         canvas.drawArc(mArcBounds, START_ANGLE, SWEEP_ANGLE * getProgress(), false, mArcPaint);
 
-        float needleAngle = (float) Math.toRadians(START_ANGLE + SWEEP_ANGLE * getProgress());
-        float needleLength = radius * 0.78f;
-        canvas.drawLine(
-                centerX,
-                centerY,
-                centerX + (float) Math.cos(needleAngle) * needleLength,
-                centerY + (float) Math.sin(needleAngle) * needleLength,
-                mNeedlePaint);
-
-        canvas.drawCircle(centerX, centerY, size * 0.035f, mNeedlePaint);
         canvas.drawText(mLabel, centerX, size * 0.16f, mLabelPaint);
-        canvas.drawText(formatValue(), centerX, centerY + radius * 0.68f, mTextPaint);
-        canvas.drawText(mUnit, centerX, centerY + radius * 0.94f, mLabelPaint);
+        drawCenteredValueAndUnit(canvas, centerX, centerY, size);
+    }
+
+    private void drawCenteredValueAndUnit(Canvas canvas, float centerX, float centerY, float size) {
+        float spacing = size * 0.015f;
+
+        String valueText = formatValue();
+        Paint.FontMetrics valueMetrics = mTextPaint.getFontMetrics();
+        Paint.FontMetrics unitMetrics = mLabelPaint.getFontMetrics();
+        float valueHeight = valueMetrics.bottom - valueMetrics.top;
+        float unitHeight = unitMetrics.bottom - unitMetrics.top;
+
+        if (mUnit.isEmpty()) {
+            float valueBaseline = centerY - (valueMetrics.ascent + valueMetrics.descent) / 2f;
+            canvas.drawText(valueText, centerX, valueBaseline, mTextPaint);
+            return;
+        }
+
+        float groupHeight = valueHeight + spacing + unitHeight;
+        float groupTop = centerY - groupHeight / 2f;
+        float valueBaseline = groupTop - valueMetrics.top;
+        float unitBaseline = valueBaseline + valueHeight + spacing - unitMetrics.top;
+
+        canvas.drawText(valueText, centerX, valueBaseline, mTextPaint);
+        canvas.drawText(mUnit, centerX, unitBaseline, mLabelPaint);
     }
 
     private float getProgress() {

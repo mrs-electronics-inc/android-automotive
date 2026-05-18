@@ -2,6 +2,7 @@ workspace := "/srv/android-automotive"
 release := "imx-automotive-16.0.0_1.1.0"
 source_tree := workspace / release / "android_build"
 images_dir := workspace / "releases" / release
+apps_dir := workspace / "releases" / release / "apps"
 build_container := "android-automotive-build"
 dockerfile := source_tree / "device" / "nxp" / "common" / "dockerbuild" / "Dockerfile"
 os_src := workspace / "os"
@@ -89,18 +90,39 @@ build: sync-os
            u-boot-imx8qm-md.imx \
            u-boot-imx8qm-mek-uuu.imx \
            uuu_imx_android_flash.sh \
-         ; do \
+           ; do \
            cp -v $pattern /work/releases/{{release}}/mek_8q/ 2>/dev/null || true; \
          done'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
+
+build-app module="GaugeCluster": sync-os
+  @echo "Fixing permissions on source tree..."
+  @sudo find {{source_tree}} ! -group {{groupid}} -print0 | xargs -0 -r chgrp -hv {{groupid}} 2>/dev/null || true
+  @rm -rf {{apps_dir}}/{{module}}
+  @docker rm -f {{build_container}} 2>/dev/null || true
+  @docker run -d \
+    --name {{build_container}} \
+    --entrypoint /bin/bash \
+    --privileged \
+    -u {{userid}}:{{groupid}} \
+    -v {{source_tree}}:/work/android_src \
+    -v {{workspace}}/releases:/work/releases \
+    android-build \
+    -lc 'set -e; \
+         cd /work/android_src && \
+         source build/envsetup.sh && \
+         lunch mek_8q_car2-nxp_stable-userdebug && \
+         m {{module}} && \
+         apk=$(find out/target/product/mek_8q/system -name "{{module}}.apk" | head -n1); \
+         test -n "$apk"; \
+         mkdir -p /work/releases/{{release}}/apps/{{module}}; \
+         cp -v "$apk" /work/releases/{{release}}/apps/{{module}}/'
+
+  @echo "App build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 
 clean-build:
   rm -rf {{source_tree}}/out
 
 clean-artifacts:
   rm -rf {{images_dir}}
-
-verify-artifacts:
-  ls -lah {{images_dir}}
-  ls -lah {{images_dir}}/mek_8q

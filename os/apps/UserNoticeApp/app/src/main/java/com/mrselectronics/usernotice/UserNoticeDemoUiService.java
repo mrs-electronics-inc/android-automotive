@@ -2,7 +2,6 @@ package com.mrselectronics.usernotice;
 
 import android.app.AlertDialog;
 import android.app.Service;
-import android.car.settings.CarSettings;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Binder;
@@ -25,6 +24,8 @@ import com.android.internal.annotations.GuardedBy;
 public final class UserNoticeDemoUiService extends Service {
 
     private static final String TAG = UserNoticeDemoUiService.class.getSimpleName();
+    private static final String KEY_ENABLE_INITIAL_NOTICE_SCREEN_TO_USER =
+            "android.car.ENABLE_INITIAL_NOTICE_SCREEN_TO_USER";
 
     private static final String IUSER_NOTICE_BINDER_DESCRIPTOR = "android.car.user.IUserNotice";
     private static final int IUSER_NOTICE_TR_ON_DIALOG_DISMISSED =
@@ -142,8 +143,8 @@ public final class UserNoticeDemoUiService extends Service {
                 })
                 .setNegativeButton(R.string.dismiss_forever, (DialogInterface d, int w) -> {
                     Settings.Secure.putInt(getContentResolver(),
-                            CarSettings.Secure.KEY_ENABLE_INITIAL_NOTICE_SCREEN_TO_USER,
-                            /* enable= */ 0);
+                            KEY_ENABLE_INITIAL_NOTICE_SCREEN_TO_USER,
+                            /* disable initial notice screen */ 0);
                     stopDialog(true);
                 })
                 .setOnDismissListener((DialogInterface d) -> {

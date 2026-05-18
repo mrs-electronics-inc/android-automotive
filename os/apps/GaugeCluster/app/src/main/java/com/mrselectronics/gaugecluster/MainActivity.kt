@@ -176,7 +176,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun getFuelCapacity(): Float {
         val manager = carPropertyManager ?: return 0f
-        val fuelCapacityValue = manager.getProperty(VehiclePropertyIds.INFO_FUEL_CAPACITY, 0)
+        val fuelCapacityValue = manager.getProperty<Float>(
+            VehiclePropertyIds.INFO_FUEL_CAPACITY,
+            0
+        )
             ?: return 0f
         if (fuelCapacityValue.status != CarPropertyValue.STATUS_AVAILABLE) {
             return 0f

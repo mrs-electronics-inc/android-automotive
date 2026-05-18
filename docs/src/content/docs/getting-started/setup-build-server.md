@@ -392,6 +392,11 @@ directly into:
 
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
+The build timing summary lives alongside those files as
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/build-time.txt`.
+For app-only builds, look in
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/build-time.txt`.
+
 The directory should be shaped roughly like this:
 
 ```text

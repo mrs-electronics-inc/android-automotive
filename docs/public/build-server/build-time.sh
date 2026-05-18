@@ -29,5 +29,6 @@ printf "recipe=%s\nstart_utc=%s\nend_utc=%s\nduration_seconds=%s\nstatus=%s\n" \
   > "$metadata_file"
 
 echo "$recipe_name finished at $end_iso (duration ${duration}s, exit ${status})"
+cat "$metadata_file"
 
 exit "$status"

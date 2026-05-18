@@ -39,15 +39,15 @@ build-container:
   #
   # To keep the workflow stable across fresh source bundle extracts, patch the
   # Dockerfile in place before building the image. The check makes this idempotent.
-  @if ! grep -Eq '\bzip\b' {{dockerfile}}; then \
-    echo "Patching NXP Dockerfile to include zip (required by Soong/AOSP)"; \
-    sed -i 's/\bunzip\b/& zip/' {{dockerfile}}; \
-  fi
+  @bash {{workspace}}/build-time.sh {{workspace}}/build-metadata/build-container.txt build-container bash -lc "if ! grep -Eq '\\bzip\\b' {{dockerfile}}; then \
+    echo \"Patching NXP Dockerfile to include zip (required by Soong/AOSP)\"; \
+    sed -i 's/\\bunzip\\b/& zip/' {{dockerfile}}; \
+  fi; \
   cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
-    --build-arg userid=$(id -u) \
-    --build-arg groupid=$(id -g) \
-    --build-arg username=$(id -un) \
-    -t android-build .
+    --build-arg userid=\$(id -u) \
+    --build-arg groupid=\$(id -g) \
+    --build-arg username=\$(id -un) \
+    -t android-build ."
 
 build: sync-os
   @echo "Fixing permissions on source tree..."
@@ -60,9 +60,10 @@ build: sync-os
     --privileged \
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
+    -v {{workspace}}:/work/workspace \
     -v {{workspace}}/releases:/work/releases \
     android-build \
-    -lc 'set -e; \
+    -lc 'bash /work/workspace/build-time.sh /work/releases/{{release}}/build-time.txt build bash -lc "set -e; \
          cd /work/android_src && \
          source build/envsetup.sh && \
          lunch mek_8q_car2-nxp_stable-userdebug && \
@@ -91,8 +92,8 @@ build: sync-os
            u-boot-imx8qm-mek-uuu.imx \
            uuu_imx_android_flash.sh \
            ; do \
-           cp -v $pattern /work/releases/{{release}}/mek_8q/ 2>/dev/null || true; \
-         done'
+           cp -v \$pattern /work/releases/{{release}}/mek_8q/ 2>/dev/null || true; \
+         done"'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 
@@ -107,17 +108,18 @@ build-app module="GaugeCluster": sync-os
     --privileged \
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
+    -v {{workspace}}:/work/workspace \
     -v {{workspace}}/releases:/work/releases \
     android-build \
-    -lc 'set -e; \
+    -lc 'bash /work/workspace/build-time.sh /work/releases/{{release}}/apps/{{module}}/build-time.txt build-app bash -lc "set -e; \
          cd /work/android_src && \
          source build/envsetup.sh && \
          lunch mek_8q_car2-nxp_stable-userdebug && \
          m {{module}} && \
-         apk=$(find out/target/product/mek_8q/system -name "{{module}}.apk" | head -n1); \
-         test -n "$apk"; \
+         apk=\$(find out/target/product/mek_8q/system -name \"{{module}}.apk\" | head -n1); \
+         test -n \"\$apk\"; \
          mkdir -p /work/releases/{{release}}/apps/{{module}}; \
-         cp -v "$apk" /work/releases/{{release}}/apps/{{module}}/'
+         cp -v \"\$apk\" /work/releases/{{release}}/apps/{{module}}/"'
 
   @echo "App build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 

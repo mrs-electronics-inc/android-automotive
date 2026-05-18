@@ -132,13 +132,15 @@ If `touch` fails, run `newgrp android-build` again and repeat the check before r
 
 This repo includes a dedicated build-server `justfile` [here](/build-server/justfile).
 
-Run this recipe from the repo root on your laptop to copy that file onto the build server:
+Run these recipes from the repo root on your laptop to copy the build-server
+recipes and the shared timing helper onto the build server:
 
 ```bash
 just push-build-server-file user@host docs/public/build-server/justfile
+just push-build-server-file user@host docs/public/build-server/build-time.sh
 ```
 
-That recipe copies the given file into `/srv/android-automotive/` on the build server.
+Those recipes copy both files into `/srv/android-automotive/` on the build server.
 
 The intended usage on the build server is:
 
@@ -287,6 +289,10 @@ just build
 This recipe starts the build in the background. It does not require you to
 keep the SSH session open while the build runs.
 
+It also writes a `build-time.txt` file next to the published artifacts in
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/`, so the start
+time, end time, elapsed seconds, and exit status travel with the build output.
+
 The build workflow handles:
 
 - building the Docker image from `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build`
@@ -358,6 +364,10 @@ That recipe still syncs `os/` into the Android source tree, but it only builds
 the requested module and publishes the APK into:
 
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/<module>.apk`
+
+It also writes a matching `build-time.txt` file into
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/apps/<module>/`
+so app rebuild timing stays attached to the APK artifact.
 
 Replace `<module>` with the app name you want to rebuild, such as
 `GaugeCluster` or `UserNoticeApp`.

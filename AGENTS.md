@@ -15,6 +15,7 @@ This project uses the [Specture System](https://github.com/specture-system/spect
 ### Ask First (pause for approval)
 
 - Push to remote
+- Push changes to the build server
 
 ### Never Do (hard stop)
 

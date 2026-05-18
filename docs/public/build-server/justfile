@@ -38,19 +38,20 @@ build-container:
   #
   # To keep the workflow stable across fresh source bundle extracts, patch the
   # Dockerfile in place before building the image. The check makes this idempotent.
-  @if ! grep -Eq '\bzip\b' {{dockerfile}}; then \
-    echo "Patching NXP Dockerfile to include zip (required by Soong/AOSP)"; \
-    sed -i 's/\bunzip\b/& zip/' {{dockerfile}}; \
-  fi
+  @bash {{workspace}}/build-time.sh {{workspace}}/build-metadata/build-container.txt build-container bash -lc "if ! grep -Eq '\\bzip\\b' {{dockerfile}}; then \
+    echo \"Patching NXP Dockerfile to include zip (required by Soong/AOSP)\"; \
+    sed -i 's/\\bunzip\\b/& zip/' {{dockerfile}}; \
+  fi; \
   cd {{source_tree}}/device/nxp/common/dockerbuild && docker build --no-cache \
-    --build-arg userid=$(id -u) \
-    --build-arg groupid=$(id -g) \
-    --build-arg username=$(id -un) \
-    -t android-build .
+    --build-arg userid=\$(id -u) \
+    --build-arg groupid=\$(id -g) \
+    --build-arg username=\$(id -un) \
+    -t android-build ."
 
 build: sync-os
   @echo "Fixing permissions on source tree..."
   @sudo find {{source_tree}} ! -group {{groupid}} -print0 | xargs -0 -r chgrp -hv {{groupid}} 2>/dev/null || true
+  @rm -rf {{images_dir}}
   @docker rm -f {{build_container}} 2>/dev/null || true
   @docker run -d \
     --name {{build_container}} \
@@ -58,45 +59,45 @@ build: sync-os
     --privileged \
     -u {{userid}}:{{groupid}} \
     -v {{source_tree}}:/work/android_src \
+    -v {{workspace}}:/work/workspace \
+    -v {{workspace}}/releases:/work/releases \
     android-build \
-    -lc 'cd /work/android_src && source build/envsetup.sh && lunch mek_8q_car2-nxp_stable-userdebug && ./imx-make.sh -j1 2>&1'
+    -lc 'bash /work/workspace/build-time.sh /work/releases/{{release}}/build-time.txt build bash -lc "set -e; \
+         cd /work/android_src && \
+         source build/envsetup.sh && \
+         lunch mek_8q_car2-nxp_stable-userdebug && \
+         ./imx-make.sh -j2 2>&1 && \
+         rm -rf /work/releases/{{release}} && \
+         mkdir -p /work/releases/{{release}}/mek_8q && \
+         cd out/target/product/mek_8q && \
+         for pattern in \
+           boot.img \
+           boot-imx.img \
+           init_boot.img \
+           vendor_boot.img \
+           vendor_boot-debug.img \
+           super.img \
+           super_empty.img \
+           partition-table.img \
+           partition-table-13GB.img \
+           partition-table-dual.img \
+           partition-table-13GB-dual.img \
+           dtbo.img \
+           dtbo-*.img \
+           vbmeta.img \
+           vbmeta-*.img \
+           u-boot-imx8qm.imx \
+           u-boot-imx8qm-md.imx \
+           u-boot-imx8qm-mek-uuu.imx \
+           uuu_imx_android_flash.sh \
+           ; do \
+           cp -v \$pattern /work/releases/{{release}}/mek_8q/ 2>/dev/null || true; \
+         done"'
 
   @echo "Build started. Use 'docker ps' to check status and 'docker logs -f {{build_container}}' to view output."
 
 clean-build:
   rm -rf {{source_tree}}/out
 
-publish-artifacts:
-  rm -rf {{images_dir}}
-  mkdir -p {{images_dir}}/mek_8q
-  cd {{source_tree}}/out/target/product/mek_8q && \
-    for pattern in \
-      boot.img \
-      boot-imx.img \
-      init_boot.img \
-      vendor_boot.img \
-      vendor_boot-debug.img \
-      super.img \
-      super_empty.img \
-      partition-table.img \
-      partition-table-13GB.img \
-      partition-table-dual.img \
-      partition-table-13GB-dual.img \
-      dtbo.img \
-      dtbo-*.img \
-      vbmeta.img \
-      vbmeta-*.img \
-      u-boot-imx8qm.imx \
-      u-boot-imx8qm-md.imx \
-      u-boot-imx8qm-mek-uuu.imx \
-      uuu_imx_android_flash.sh \
-    ; do \
-      cp -v $pattern {{images_dir}}/mek_8q/ 2>/dev/null || true; \
-    done
-
 clean-artifacts:
   rm -rf {{images_dir}}
-
-verify-artifacts:
-  ls -lah {{images_dir}}
-  ls -lah {{images_dir}}/mek_8q

@@ -30,7 +30,22 @@ You can find the IP address in two ways:
 
 **Option 1: Check via UART console or existing `adb` shell**
 
-If you have serial console access or an existing USB connection, run:
+If you have an existing USB `adb` connection, run `adb shell` to get a shell on the board.
+
+Otherwise, connect to the board's serial console over the **micro-USB debug UART** port. On Linux, [`picocom`](https://github.com/npat-efault/picocom) is a lightweight choice:
+
+```bash
+picocom -b 115200 /dev/ttyUSB0
+```
+
+Notes:
+
+- the debug UART typically enumerates as `/dev/ttyUSB0` on Linux; if you have other USB-serial devices attached, check `dmesg` or `ls /dev/ttyUSB*` to find the right port
+- the console runs at 115200 baud, 8N1
+- press <kbd>Enter</kbd> after connecting to get a shell prompt
+- to exit `picocom`, press <kbd>Ctrl</kbd>+<kbd>A</kbd> then <kbd>Ctrl</kbd>+<kbd>X</kbd>
+
+Once you have a shell (via either method), run:
 
 ```bash
 ip -4 addr show eth0

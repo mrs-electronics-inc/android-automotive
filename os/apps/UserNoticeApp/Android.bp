@@ -1,0 +1,8 @@
+android_app {
+    name: "UserNoticeApp",
+    platform_apis: true,
+    certificate: "platform",
+    srcs: ["app/src/main/**/*.java"],
+    resource_dirs: ["app/src/main/res"],
+    manifest: "app/src/main/AndroidManifest.xml",
+}

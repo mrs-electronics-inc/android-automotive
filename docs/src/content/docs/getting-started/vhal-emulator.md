@@ -28,6 +28,14 @@ adb shell pm grant android.car.cluster android.car.permission.CAR_SPEED
 
 The cluster must restart to pick up the new permissions. After a reboot or force-stop, the properties will be readable and the UI updates.
 
+## Reading a property value
+
+Use `--get <propId>` to read the current value of any property:
+
+```sh
+adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default --get 0x11600305
+```
+
 ## Properties that work today
 
 On our current image all of the following properties update the cluster UI when set via `dumpsys`.
@@ -73,34 +81,24 @@ adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default \
   --set 0x11600307 -a 0 -f 10200
 ```
 
-Check the current capacity with:
-
-```sh
-adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default --get 0x11600104
-```
+You can confirm the current capacity by reading `FUEL_CAPACITY` (`0x11600104`) — see [Reading a property value](#reading-a-property-value).
 
 ### Range remaining
 
-`RANGE_REMAINING` (`0x11600308`) — float, global area. The raw value is in **meters**. The cluster converts to distance units using `distance_factor` (`1000` for km). The display shows the cluster's locale-dependent unit (km or mi).
+`RANGE_REMAINING` (`0x11600308`) — float, global area. The raw value is in **meters**. The cluster converts to distance units using `distance_factor` (`1609.344` for mi). The display shows the cluster's locale-dependent unit (mi or km).
 
 ```sh
-# ~250 km range (250000 meters)
+# ~250 mi range (402336 meters)
 adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default \
-  --set 0x11600308 -a 0 -f 250000
+  --set 0x11600308 -a 0 -f 402336
 ```
 
 ### Vehicle speed
 
-`PERF_VEHICLE_SPEED` (`0x11600207`) — float, global area. The raw value is in **meters per second**. The cluster converts using `speed_factor` (`3.6` for km/h). The display shows the cluster's locale-dependent unit (km/h or mi/h).
+`PERF_VEHICLE_SPEED` (`0x11600207`) — float, global area. The raw value is in **meters per second**. The cluster converts using `speed_factor` (`2.2369363` for mi/h). The display shows the cluster's locale-dependent unit (mi/h or km/h).
 
 ```sh
-# ~65 km/h: 65 / 3.6 ≈ 18.06 m/s
+# ~65 mi/h: 65 / 2.2369363 ≈ 29.06 m/s
 adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default \
-  --set 0x11600207 -a 0 -f 18.06
-```
-
-## Verifying a value
-
-```sh
-adb shell dumpsys android.hardware.automotive.vehicle.IVehicle/default --get 0x11600305
+  --set 0x11600207 -a 0 -f 29.06
 ```

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mrselectronics.usernotice"
+    android:sharedUserId="android.uid.system">
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+        <service
+            android:name=".UserNoticeDemoUiService"
+            android:directBootAware="true"
+            android:exported="true" />
+    </application>
+
+</manifest>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.mrselectronics.demoapp.MainActivity">
+
+        <com.mrselectronics.demoapp.VehiclePropertyView
+            android:id="@+id/gear_property_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.mrselectronics.demoapp.VehiclePropertyView
+            android:id="@+id/speed_property_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.mrselectronics.demoapp.VehiclePropertyView
+            android:id="@+id/battery_level_property_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.mrselectronics.demoapp.VehiclePropertyView
+            android:id="@+id/fuel_door_property_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</ScrollView>

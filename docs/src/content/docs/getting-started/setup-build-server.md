@@ -36,7 +36,7 @@ This workflow assumes a dedicated build server with:
 - Ubuntu 24.04
 - 4 CPU cores
 - 32 GB RAM
-- 16 GB or more of swap configured
+- 32 GB or more of swap configured
 - 450 GB of free disk space before the source bundle is extracted
 - Docker installed and usable by the build users
 
@@ -73,13 +73,13 @@ newgrp docker
 ## Configure swap
 
 Android Automotive builds can exhaust memory during Soong bootstrap even when the
-main build runs with `-j1`. On a 32 GB build server, configure at least 16 GB of
+main build runs with `-j2`. On a 32 GB build server, configure at least 32 GB of
 swap before running the first full build.
 
 One straightforward Ubuntu setup is a swapfile:
 
 ```bash
-sudo fallocate -l 16G /swapfile
+sudo fallocate -l 32G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
@@ -132,13 +132,15 @@ If `touch` fails, run `newgrp android-build` again and repeat the check before r
 
 This repo includes a dedicated build-server `justfile` [here](/build-server/justfile).
 
-Run this recipe from the repo root on your laptop to copy that file onto the build server:
+Run these recipes from the repo root on your laptop to copy the build-server
+recipes and the shared timing helper onto the build server:
 
 ```bash
 just push-build-server-file user@host docs/public/build-server/justfile
+just push-build-server-file user@host docs/public/build-server/build-time.sh
 ```
 
-That recipe copies the given file into `/srv/android-automotive/` on the build server.
+Those recipes copy both files into `/srv/android-automotive/` on the build server.
 
 The intended usage on the build server is:
 
@@ -281,20 +283,26 @@ cd /srv/android-automotive
 just build-container
 just build
 ```
+
 :::
 
 This recipe starts the build in the background. It does not require you to
 keep the SSH session open while the build runs.
+
+It also writes a `build-time.txt` file next to the published artifacts in
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/`, so the start
+time, end time, elapsed seconds, and exit status travel with the build output.
 
 The build workflow handles:
 
 - building the Docker image from `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build`
 - starting a detached container with that `android_build` tree mounted at `/work/android_src`
 - running `lunch mek_8q_car2-nxp_stable-userdebug`
-- running `./imx-make.sh -j1`
+- running `./imx-make.sh -j2`
+- publishing the finished artifacts into `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q/`
 
 :::note
-The build uses `-j1` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
+The build uses `-j2` instead of higher parallelism to avoid running out of memory or hogging CPU on the shared build server.
 :::
 
 :::caution
@@ -317,11 +325,18 @@ just build
 If the resumed build fails again immediately or starts reporting inconsistent
 Soong or Ninja state, then clear `out` and retry from a clean build:
 
+After a successful build, the release artifacts are already in:
+
+```text
+/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/mek_8q
+```
+
 ```bash
 cd /srv/android-automotive
 just clean-build
 just build
 ```
+
 :::
 
 To check whether the detached container is still running, use `docker ps`. To inspect the latest build output, use `docker logs -f android-automotive-build`.
@@ -335,23 +350,17 @@ When the build completes, the output images should be under:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
 
-## Publish build outputs
+## Build outputs
 
-Publishing build outputs should mean creating a stable release directory on the
-build server that the laptop can pull from later.
-
-For the current shared `justfile`, the publish target is:
+When `just build` finishes successfully, it publishes the release artifacts
+directly into:
 
 `/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0`
 
-Run:
+The build timing summary lives alongside those files as
+`/srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/build-time.txt`.
 
-```bash
-cd /srv/android-automotive
-just publish-artifacts
-```
-
-That should produce a directory shaped roughly like this:
+The directory should be shaped roughly like this:
 
 ```text
 /srv/android-automotive/releases/imx-automotive-16.0.0_1.1.0/
@@ -378,13 +387,6 @@ That should produce a directory shaped roughly like this:
 These files are copied from:
 
 `/srv/android-automotive/imx-automotive-16.0.0_1.1.0/android_build/out/target/product/mek_8q`
-
-Verify the published release directory with:
-
-```bash
-cd /srv/android-automotive
-just verify-artifacts
-```
 
 ## Clean up
 
@@ -416,6 +418,6 @@ If setup or builds stall, check these first:
 
 ## Next step
 
-After the build server is producing published images, continue with the laptop-side deployment and app workflow:
+After the build server is producing published images, continue with:
 
-- [Running the Demo App](./demo-app)
+- [Flash OS](./flash-os)

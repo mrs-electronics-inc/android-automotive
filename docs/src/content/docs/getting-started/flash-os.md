@@ -11,6 +11,9 @@ This workflow is intentionally focused on the following setup:
 
 - C-series i.MX8 QuadMax MEK board
 - the multi-display image set with HDMI infotainment output
+- use the full flash path when you need to replace the board image or validate
+  OS-level changes; app-only changes can use the app build path in
+  [Setup Build Server](/getting-started/setup-build-server/)
 
 ## Before you start
 
@@ -37,13 +40,7 @@ just pull-build-artifacts user@host
 After that, the images should be under:
 
 ```text
-/tmp/imx-automotive-16.0.0_1.1.0/mek_8q
-```
-
-Verify the local artifact set with:
-
-```bash
-just verify-deploy-artifacts
+build-artifacts/imx-automotive-16.0.0_1.1.0/mek_8q
 ```
 
 ## Full flash from serial download mode
@@ -97,8 +94,8 @@ If you have a specific change to validate, this is the right point to confirm it
   - Use `001000` for serial download flashing and `000100` for normal eMMC boot.
 - USB cable connected to the wrong port
   - Use the board's **USB 3.0 Type-C / OTG** port for flashing.
-- Missing required published artifacts under `/tmp/imx-automotive-16.0.0_1.1.0/mek_8q`
-  - Rerun `just pull-build-artifacts user@host` and `just verify-deploy-artifacts`.
+- Missing required published artifacts under `build-artifacts/imx-automotive-16.0.0_1.1.0/mek_8q`
+  - Rerun `just pull-build-artifacts user@host`.
 
 ## References
 

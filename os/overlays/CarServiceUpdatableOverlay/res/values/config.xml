@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array translatable="false" name="config_allowed_optional_car_features">
+        <item>cluster_home_service</item>
+    </string-array>
+    <!-- Full ClusterHome mode keeps the gauge cluster aligned with the cluster-home contract. -->
+    <integer name="config_clusterHomeServiceMode">0</integer>
+    <string name="config_userNoticeUiService" translatable="false">com.mrselectronics.usernotice/.UserNoticeDemoUiService</string>
+    <string name="config_clusterHomeActivity" translatable="false">com.mrselectronics.gaugecluster/.MainActivity</string>
+</resources>

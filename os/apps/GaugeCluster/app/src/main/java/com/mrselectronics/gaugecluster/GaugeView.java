@@ -8,6 +8,8 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.core.content.ContextCompat;
+
 import java.util.Locale;
 
 public class GaugeView extends View {
@@ -41,7 +43,7 @@ public class GaugeView extends View {
         mTrackPaint.setStyle(Paint.Style.STROKE);
         mTrackPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        mArcPaint.setColor(Color.rgb(0, 255, 120));
+        mArcPaint.setColor(ContextCompat.getColor(getContext(), R.color.system_ui_blue));
         mArcPaint.setStyle(Paint.Style.STROKE);
         mArcPaint.setStrokeCap(Paint.Cap.ROUND);
 
@@ -87,12 +89,18 @@ public class GaugeView extends View {
         canvas.drawArc(mArcBounds, START_ANGLE, SWEEP_ANGLE, false, mTrackPaint);
         canvas.drawArc(mArcBounds, START_ANGLE, SWEEP_ANGLE * getProgress(), false, mArcPaint);
 
-        canvas.drawText(mLabel, centerX, size * 0.16f, mLabelPaint);
+        drawCenteredTextInBand(
+                canvas,
+                mLabel,
+                centerX,
+                size * 0.06f,
+                mArcBounds.top - size * 0.08f,
+                mLabelPaint);
         drawCenteredValueAndUnit(canvas, centerX, centerY, size);
     }
 
     private void drawCenteredValueAndUnit(Canvas canvas, float centerX, float centerY, float size) {
-        float spacing = size * 0.015f;
+        float spacing = size * 0.006f;
 
         String valueText = formatValue();
         Paint.FontMetrics valueMetrics = mTextPaint.getFontMetrics();
@@ -109,10 +117,24 @@ public class GaugeView extends View {
         float groupHeight = valueHeight + spacing + unitHeight;
         float groupTop = centerY - groupHeight / 2f;
         float valueBaseline = groupTop - valueMetrics.top;
-        float unitBaseline = valueBaseline + valueHeight + spacing - unitMetrics.top;
+        float unitTop = groupTop + valueHeight + spacing;
+        float unitBaseline = unitTop - unitMetrics.top;
 
         canvas.drawText(valueText, centerX, valueBaseline, mTextPaint);
         canvas.drawText(mUnit, centerX, unitBaseline, mLabelPaint);
+    }
+
+    private void drawCenteredTextInBand(
+            Canvas canvas, String text, float centerX, float top, float bottom, Paint paint) {
+        if (text.isEmpty() || bottom <= top) {
+            return;
+        }
+
+        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+        float textHeight = fontMetrics.bottom - fontMetrics.top;
+        float availableHeight = bottom - top;
+        float baseline = top + (availableHeight - textHeight) / 2f - fontMetrics.top;
+        canvas.drawText(text, centerX, baseline, paint);
     }
 
     private float getProgress() {

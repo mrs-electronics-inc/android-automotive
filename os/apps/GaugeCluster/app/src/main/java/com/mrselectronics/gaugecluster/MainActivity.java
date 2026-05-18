@@ -15,13 +15,21 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "GaugeCluster";
-    private static final float PROPERTIES_REFRESH_RATE = 5f;
+    private static final float METERS_PER_SECOND_TO_MPH = 2.2369363f;
+    private static final float METERS_PER_SECOND_TO_KMH = 3.6f;
+    private static final float METERS_PER_MILE = 1609.344f;
+    private static final float METERS_PER_KILOMETER = 1000f;
+    private static final float MAX_SPEED_MPH = 120f;
+    private static final float MAX_SPEED_KMH = 200f;
+    private static final float MAX_RANGE_MI = 300f;
+    private static final float MAX_RANGE_KM = 500f;
+    private static final float MAX_RPM = 7000f;
 
-    private TextView mFuelText;
     private TextView mGearText;
-    private TextView mSpeedText;
-    private TextView mRangeText;
-    private TextView mRpmText;
+    private GaugeView mFuelGauge;
+    private GaugeView mSpeedGauge;
+    private GaugeView mRangeGauge;
+    private GaugeView mRpmGauge;
 
     private Car mCar;
     private CarPropertyManager mCarPropertyManager;
@@ -46,11 +54,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mGearText = findViewById(R.id.gear_value);
-        mFuelText = findViewById(R.id.fuel_value);
-        mSpeedText = findViewById(R.id.speed_value);
-        mRangeText = findViewById(R.id.range_value);
-        mRpmText = findViewById(R.id.rpm_value);
+        mFuelGauge = findViewById(R.id.fuel_gauge);
+        mSpeedGauge = findViewById(R.id.speed_gauge);
+        mRangeGauge = findViewById(R.id.range_gauge);
+        mRpmGauge = findViewById(R.id.rpm_gauge);
         mLocale = getResources().getConfiguration().getLocales().get(0);
+        configureGauges();
 
         mCar = Car.createCar(this);
         mCarPropertyManager = (CarPropertyManager) mCar.getCarManager(Car.PROPERTY_SERVICE);
@@ -83,41 +92,26 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        Number rawValue = (Number) value.getValue();
         switch (propId) {
             case VehiclePropertyIds.GEAR_SELECTION:
-                mGearText.setText(formatGear(((Number) value.getValue()).intValue()));
+                mGearText.setText(formatGear(rawValue.intValue()));
                 break;
             case VehiclePropertyIds.FUEL_LEVEL:
-                float floatValue = (float) value.getValue();
-                float fuelCapacity = ((Number) mCarPropertyManager.getProperty(
-                        VehiclePropertyIds.INFO_FUEL_CAPACITY, 0).getValue()).floatValue();
+                float fuelCapacity = getFuelCapacity();
                 if (fuelCapacity > 0) {
-                    int fuelPercent = Math.round(floatValue / fuelCapacity * 100f);
-                    mFuelText.setText(fuelPercent + "%");
+                    float fuelPercent = rawValue.floatValue() / fuelCapacity * 100f;
+                    mFuelGauge.setValue(fuelPercent);
                 }
                 break;
             case VehiclePropertyIds.PERF_VEHICLE_SPEED:
-                floatValue = (float) value.getValue();
-                if (isImperialLocale()) {
-                    int speed = Math.round(floatValue * 2.2369363f);
-                    mSpeedText.setText(speed + " mph");
-                } else {
-                    int speed = Math.round(floatValue * 3.6f);
-                    mSpeedText.setText(speed + " km/h");
-                }
+                mSpeedGauge.setValue(convertSpeed(rawValue.floatValue()));
                 break;
             case VehiclePropertyIds.RANGE_REMAINING:
-                floatValue = (float) value.getValue();
-                if (isImperialLocale()) {
-                    int range = Math.round(floatValue / 1609.344f);
-                    mRangeText.setText(range + " mi");
-                } else {
-                    int range = Math.round(floatValue / 1000f);
-                    mRangeText.setText(range + " km");
-                }
+                mRangeGauge.setValue(convertRange(rawValue.floatValue()));
                 break;
             case VehiclePropertyIds.ENGINE_RPM:
-                mRpmText.setText(String.format("%.0f", floatValue));
+                mRpmGauge.setValue(rawValue.floatValue());
                 break;
         }
     }
@@ -136,6 +130,46 @@ public class MainActivity extends AppCompatActivity {
     private boolean isImperialLocale() {
         String country = mLocale.getCountry();
         return "US".equals(country) || "LR".equals(country) || "MM".equals(country);
+    }
+
+    private void configureGauges() {
+        boolean imperial = isImperialLocale();
+        mSpeedGauge.configure(
+                getString(R.string.label_speed),
+                imperial ? "mph" : "km/h",
+                0f,
+                imperial ? MAX_SPEED_MPH : MAX_SPEED_KMH);
+        mRpmGauge.configure(getString(R.string.label_rpm), "rpm", 0f, MAX_RPM);
+        mFuelGauge.configure(getString(R.string.label_fuel), "%", 0f, 100f);
+        mRangeGauge.configure(
+                getString(R.string.label_range),
+                imperial ? "mi" : "km",
+                0f,
+                imperial ? MAX_RANGE_MI : MAX_RANGE_KM);
+    }
+
+    private float convertSpeed(float metersPerSecond) {
+        if (isImperialLocale()) {
+            return metersPerSecond * METERS_PER_SECOND_TO_MPH;
+        }
+        return metersPerSecond * METERS_PER_SECOND_TO_KMH;
+    }
+
+    private float convertRange(float meters) {
+        if (isImperialLocale()) {
+            return meters / METERS_PER_MILE;
+        }
+        return meters / METERS_PER_KILOMETER;
+    }
+
+    private float getFuelCapacity() {
+        CarPropertyValue fuelCapacityValue = mCarPropertyManager.getProperty(
+                VehiclePropertyIds.INFO_FUEL_CAPACITY, 0);
+        if (fuelCapacityValue == null || fuelCapacityValue.getStatus()
+                != CarPropertyValue.STATUS_AVAILABLE) {
+            return 0f;
+        }
+        return ((Number) fuelCapacityValue.getValue()).floatValue();
     }
 
     private String formatGear(int gearValue) {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Gauge Cluster</string>
-    <string name="label_gear">Gear</string>
     <string name="label_fuel">Fuel</string>
+    <string name="label_battery">Battery</string>
     <string name="label_speed">Speed</string>
     <string name="label_range">Range</string>
     <string name="label_rpm">RPM</string>

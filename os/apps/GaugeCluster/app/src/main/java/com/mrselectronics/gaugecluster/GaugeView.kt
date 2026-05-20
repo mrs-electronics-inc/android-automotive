@@ -17,7 +17,7 @@ class GaugeView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(R.color.system_ui_blue)
+        color = context.getColor(R.color.system_ui_blue_bright)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
@@ -34,21 +34,26 @@ class GaugeView @JvmOverloads constructor(
         isFakeBoldText = true
     }
 
-    private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(150, 160, 160)
         textAlign = Paint.Align.CENTER
     }
 
+    private val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.getColor(R.color.system_ui_blue_bright)
+        textAlign = Paint.Align.CENTER
+        isFakeBoldText = true
+    }
+
     private val arcBounds = RectF()
 
-    private var label = ""
     private var unit = ""
     private var minValue = 0f
     private var maxValue = 100f
     private var value = 0f
+    private var badge = ""
 
-    fun configure(label: String, unit: String, minValue: Float, maxValue: Float) {
-        this.label = label
+    fun configure(unit: String, minValue: Float, maxValue: Float) {
         this.unit = unit
         this.minValue = minValue
         this.maxValue = maxValue
@@ -57,6 +62,14 @@ class GaugeView @JvmOverloads constructor(
 
     fun setValue(value: Float) {
         this.value = value
+        invalidate()
+    }
+
+    fun setBadge(text: String) {
+        if (badge == text) {
+            return
+        }
+        badge = text
         invalidate()
     }
 
@@ -74,21 +87,14 @@ class GaugeView @JvmOverloads constructor(
         trackPaint.strokeWidth = strokeWidth
         arcPaint.strokeWidth = strokeWidth
         valuePaint.textSize = size * 0.17f
-        labelPaint.textSize = size * 0.075f
+        badgePaint.textSize = size * 0.11f
 
         arcBounds.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
         canvas.drawArc(arcBounds, START_ANGLE, SWEEP_ANGLE, false, trackPaint)
         canvas.drawArc(arcBounds, START_ANGLE, SWEEP_ANGLE * progress, false, arcPaint)
 
-        drawCenteredTextInBand(
-            canvas = canvas,
-            text = label,
-            centerX = centerX,
-            top = size * 0.06f,
-            bottom = arcBounds.top - size * 0.08f,
-            paint = labelPaint
-        )
-        drawCenteredValueAndUnit(canvas, centerX, centerY, size)
+        val groupBottom = drawCenteredValueAndUnit(canvas, centerX, centerY, size)
+        drawBadge(canvas, centerX, groupBottom, size)
     }
 
     private fun drawCenteredValueAndUnit(
@@ -96,18 +102,18 @@ class GaugeView @JvmOverloads constructor(
         centerX: Float,
         centerY: Float,
         size: Float
-    ) {
+    ): Float {
         val spacing = size * 0.006f
         val valueText = formatValue()
         val valueMetrics = valuePaint.fontMetrics
-        val unitMetrics = labelPaint.fontMetrics
+        val unitMetrics = unitPaint.fontMetrics
         val valueHeight = valueMetrics.bottom - valueMetrics.top
         val unitHeight = unitMetrics.bottom - unitMetrics.top
 
         if (unit.isBlank()) {
             val valueBaseline = centerY - (valueMetrics.ascent + valueMetrics.descent) / 2f
             canvas.drawText(valueText, centerX, valueBaseline, valuePaint)
-            return
+            return valueBaseline + valueMetrics.descent
         }
 
         val groupHeight = valueHeight + spacing + unitHeight
@@ -117,26 +123,18 @@ class GaugeView @JvmOverloads constructor(
         val unitBaseline = unitTop - unitMetrics.top
 
         canvas.drawText(valueText, centerX, valueBaseline, valuePaint)
-        canvas.drawText(unit, centerX, unitBaseline, labelPaint)
+        canvas.drawText(unit, centerX, unitBaseline, unitPaint)
+        return groupTop + groupHeight
     }
 
-    private fun drawCenteredTextInBand(
-        canvas: Canvas,
-        text: String,
-        centerX: Float,
-        top: Float,
-        bottom: Float,
-        paint: Paint
-    ) {
-        if (text.isEmpty() || bottom <= top) {
+    private fun drawBadge(canvas: Canvas, centerX: Float, groupBottom: Float, size: Float) {
+        if (badge.isEmpty()) {
             return
         }
-
-        val fontMetrics = paint.fontMetrics
-        val textHeight = fontMetrics.bottom - fontMetrics.top
-        val availableHeight = bottom - top
-        val baseline = top + (availableHeight - textHeight) / 2f - fontMetrics.top
-        canvas.drawText(text, centerX, baseline, paint)
+        val gap = size * 0.04f
+        val badgeMetrics = badgePaint.fontMetrics
+        val baseline = groupBottom + gap - badgeMetrics.top
+        canvas.drawText(badge, centerX, baseline, badgePaint)
     }
 
     private val progress: Float

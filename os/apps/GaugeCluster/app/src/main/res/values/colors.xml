@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="system_ui_blue">#FF1A3A5C</color>
+    <color name="system_ui_blue">#FF2272B4</color>
+    <color name="system_ui_blue_bright">#FF56A8F0</color>
 </resources>

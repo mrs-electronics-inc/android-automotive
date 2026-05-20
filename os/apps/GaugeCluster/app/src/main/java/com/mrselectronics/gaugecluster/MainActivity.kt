@@ -136,7 +136,6 @@ class MainActivity : AppCompatActivity() {
                 energyReadout.visibility = View.VISIBLE
                 energyReadout.configure(
                     label = getString(R.string.label_fuel),
-                    unit = "%",
                     minValue = 0f,
                     maxValue = 100f,
                     showBar = true
@@ -148,7 +147,6 @@ class MainActivity : AppCompatActivity() {
                 energyReadout.visibility = View.VISIBLE
                 energyReadout.configure(
                     label = getString(R.string.label_battery),
-                    unit = "%",
                     minValue = 0f,
                     maxValue = 100f,
                     showBar = true
@@ -235,21 +233,18 @@ class MainActivity : AppCompatActivity() {
     private fun configureStaticViews() {
         val imperial = isImperialLocale()
         speedGauge.configure(
-            getString(R.string.label_speed),
             if (imperial) "mph" else "km/h",
             0f,
             if (imperial) MAX_SPEED_MPH else MAX_SPEED_KMH
         )
         rpmReadout.configure(
             label = getString(R.string.label_rpm),
-            unit = "rpm",
             minValue = 0f,
             maxValue = MAX_RPM,
             showBar = false
         )
         rangeReadout.configure(
             label = getString(R.string.label_range),
-            unit = if (imperial) "mi" else "km",
             minValue = 0f,
             maxValue = if (imperial) MAX_RANGE_MI else MAX_RANGE_KM,
             showBar = false

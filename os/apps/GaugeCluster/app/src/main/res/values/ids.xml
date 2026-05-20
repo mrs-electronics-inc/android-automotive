@@ -2,6 +2,6 @@
 <resources>
     <item type="id" name="speed_gauge"/>
     <item type="id" name="rpm_readout"/>
-    <item type="id" name="fuel_readout"/>
+    <item type="id" name="energy_readout"/>
     <item type="id" name="range_readout"/>
 </resources>

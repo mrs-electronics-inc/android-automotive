@@ -12,12 +12,22 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
     private lateinit var speedGauge: GaugeView
     private lateinit var rpmReadout: StatusReadoutView
-    private lateinit var fuelReadout: StatusReadoutView
+
+    // Tile in the rail that shows the vehicle's primary energy reserve. It
+    // reports fuel level on ICE/hybrid vehicles, or battery level on EVs,
+    // depending on which properties the HAL exposes.
+    private lateinit var energyReadout: StatusReadoutView
     private lateinit var rangeReadout: StatusReadoutView
 
     private var car: Car? = null
     private var carPropertyManager: CarPropertyManager? = null
-    private var fuelCapacityCached: Float = 0f
+
+    private enum class EnergySource { NONE, FUEL, BATTERY }
+    private var energySource: EnergySource = EnergySource.NONE
+    // Capacity used to normalize the active energy reading to a 0..100 %.
+    // Fuel: liters/gallons (whatever INFO_FUEL_CAPACITY reports).
+    // Battery: watt-hours (INFO_EV_BATTERY_CAPACITY).
+    private var energyCapacityCached: Float = 0f
 
     private val propertyCallback =
         object : CarPropertyManager.CarPropertyEventCallback {
@@ -37,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         bindViews()
-        configureViews()
+        configureStaticViews()
     }
 
     override fun onStart() {
@@ -55,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindViews() {
         speedGauge = requireViewById(R.id.speed_gauge)
         rpmReadout = requireViewById(R.id.rpm_readout)
-        fuelReadout = requireViewById(R.id.fuel_readout)
+        energyReadout = requireViewById(R.id.energy_readout)
         rangeReadout = requireViewById(R.id.range_readout)
     }
 
@@ -85,7 +95,8 @@ class MainActivity : AppCompatActivity() {
         carPropertyManager = null
         car?.disconnect()
         car = null
-        fuelCapacityCached = 0f
+        energySource = EnergySource.NONE
+        energyCapacityCached = 0f
     }
 
     private fun subscribeToProperties() {
@@ -103,13 +114,55 @@ class MainActivity : AppCompatActivity() {
             subscribe(manager, VehiclePropertyIds.ENGINE_RPM)
         }
 
-        // Fuel: hide tile when this vehicle has no fuel-level property (most EVs).
+        // Energy tile: prefer fuel when present; fall back to battery on EVs;
+        // hide entirely if neither pair is available.
+        configureEnergyTile(manager)
+    }
+
+    private fun configureEnergyTile(manager: CarPropertyManager) {
         val hasFuel = isPropertySupported(manager, VehiclePropertyIds.FUEL_LEVEL) &&
             isPropertySupported(manager, VehiclePropertyIds.INFO_FUEL_CAPACITY)
-        fuelReadout.visibility = if (hasFuel) View.VISIBLE else View.GONE
-        if (hasFuel) {
-            fuelCapacityCached = readFuelCapacity(manager)
-            subscribe(manager, VehiclePropertyIds.FUEL_LEVEL)
+        val hasBattery = isPropertySupported(manager, VehiclePropertyIds.EV_BATTERY_LEVEL) &&
+            isPropertySupported(manager, VehiclePropertyIds.INFO_EV_BATTERY_CAPACITY)
+
+        energySource = when {
+            hasFuel -> EnergySource.FUEL
+            hasBattery -> EnergySource.BATTERY
+            else -> EnergySource.NONE
+        }
+
+        when (energySource) {
+            EnergySource.FUEL -> {
+                energyReadout.visibility = View.VISIBLE
+                energyReadout.configure(
+                    label = getString(R.string.label_fuel),
+                    unit = "%",
+                    minValue = 0f,
+                    maxValue = 100f,
+                    showBar = true
+                )
+                energyCapacityCached = readCapacity(manager, VehiclePropertyIds.INFO_FUEL_CAPACITY)
+                subscribe(manager, VehiclePropertyIds.FUEL_LEVEL)
+            }
+            EnergySource.BATTERY -> {
+                energyReadout.visibility = View.VISIBLE
+                energyReadout.configure(
+                    label = getString(R.string.label_battery),
+                    unit = "%",
+                    minValue = 0f,
+                    maxValue = 100f,
+                    showBar = true
+                )
+                energyCapacityCached = readCapacity(
+                    manager,
+                    VehiclePropertyIds.INFO_EV_BATTERY_CAPACITY
+                )
+                subscribe(manager, VehiclePropertyIds.EV_BATTERY_LEVEL)
+            }
+            EnergySource.NONE -> {
+                energyReadout.visibility = View.GONE
+                energyCapacityCached = 0f
+            }
         }
     }
 
@@ -162,15 +215,24 @@ class MainActivity : AppCompatActivity() {
                 rpmReadout.setValue(raw.toFloat())
             }
             VehiclePropertyIds.FUEL_LEVEL -> {
-                val raw = value.value as? Number ?: return
-                if (fuelCapacityCached > 0f) {
-                    fuelReadout.setValue(raw.toFloat() / fuelCapacityCached * 100f)
-                }
+                if (energySource != EnergySource.FUEL) return
+                updateEnergyPercent(value)
+            }
+            VehiclePropertyIds.EV_BATTERY_LEVEL -> {
+                if (energySource != EnergySource.BATTERY) return
+                updateEnergyPercent(value)
             }
         }
     }
 
-    private fun configureViews() {
+    private fun updateEnergyPercent(value: CarPropertyValue<*>) {
+        val raw = value.value as? Number ?: return
+        if (energyCapacityCached > 0f) {
+            energyReadout.setValue(raw.toFloat() / energyCapacityCached * 100f)
+        }
+    }
+
+    private fun configureStaticViews() {
         val imperial = isImperialLocale()
         speedGauge.configure(
             getString(R.string.label_speed),
@@ -185,13 +247,6 @@ class MainActivity : AppCompatActivity() {
             maxValue = MAX_RPM,
             showBar = false
         )
-        fuelReadout.configure(
-            label = getString(R.string.label_fuel),
-            unit = "%",
-            minValue = 0f,
-            maxValue = 100f,
-            showBar = true
-        )
         rangeReadout.configure(
             label = getString(R.string.label_range),
             unit = if (imperial) "mi" else "km",
@@ -199,6 +254,8 @@ class MainActivity : AppCompatActivity() {
             maxValue = if (imperial) MAX_RANGE_MI else MAX_RANGE_KM,
             showBar = false
         )
+        // The energy tile (fuel vs. battery) is configured dynamically in
+        // configureEnergyTile() once we know what the HAL supports.
     }
 
     private fun isImperialLocale(): Boolean {
@@ -222,18 +279,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun readFuelCapacity(manager: CarPropertyManager): Float {
-        val fuelCapacityValue = try {
-            manager.getProperty<Float>(VehiclePropertyIds.INFO_FUEL_CAPACITY, 0)
+    private fun readCapacity(manager: CarPropertyManager, propId: Int): Float {
+        val capacityValue = try {
+            manager.getProperty<Float>(propId, 0)
         } catch (e: SecurityException) {
-            Log.e(TAG, "No permission for INFO_FUEL_CAPACITY", e)
+            Log.e(TAG, "No permission for property: $propId", e)
             return 0f
         } ?: return 0f
 
-        if (fuelCapacityValue.status != CarPropertyValue.STATUS_AVAILABLE) {
+        if (capacityValue.status != CarPropertyValue.STATUS_AVAILABLE) {
             return 0f
         }
-        return (fuelCapacityValue.value as? Number)?.toFloat() ?: 0f
+        return (capacityValue.value as? Number)?.toFloat() ?: 0f
     }
 
     private fun formatGear(gearValue: Int): String {
